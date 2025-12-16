@@ -1,0 +1,707 @@
+/* ============================================================================
+   DATA-ATTRIBUTE MIXINS - Centralized Attribute-Driven Styling
+   ============================================================================
+
+   Centralizes all data-attribute driven styling into reusable mixins.
+   Enables composable, semantic styling through HTML attributes.
+
+   Philosophy:
+   - Data attributes as semantic selectors (data-glass, data-elevation, etc.)
+   - CSS custom properties for runtime configuration
+   - Composable mixins for different styling scopes
+   - Single source of truth for all attribute mappings
+   - CSS-consistent naming: use standard CSS values where possible
+   - Logical progression: none → xs → sm → md → lg → xl → 2xl
+   - Semantic defaults: mixins work without data attributes
+
+   Usage:
+   .component {
+     @include glass-attr();      // data-glass="none|blur-light|blur-dark|frost-light|frost-dark" (default: blur-light)
+     @include elevation-attr();  // data-elevation="none|xs|sm|md|lg|xl|2xl" (default: md)
+     @include state-attr();      // data-state="neutral|info|success|warning|error|primary|secondary" (default: neutral)
+     @include color-attr();      // data-color="primary|secondary|accent|success|warning|danger|info|muted" (default: primary)
+     @include border-attr();     // data-border="none|thin|medium|thick|solid|dashed|semantic|glow" (default: thin)
+     @include radius-attr();     // data-radius="none|xs|sm|md|lg|xl|2xl|full" (default: md)
+     @include glow-attr();       // data-glow="none|xs|sm|md|lg|xl|2xl" (default: sm)
+     @include effect-attr();     // data-effect="inset-glow|inset-strong|outer-glow|ring" + data-color for colorization (default: none)
+   }
+
+   ============================================================================ */
+
+@use "sass:map";
+@use "tokens-semantic" as tokens;
+@use "mixins-glass-system" as glass;
+
+/* ============================================================================
+   GLASS ATTRIBUTE MIXIN - data-glass
+   ============================================================================ */
+
+/// Maps data-glass attribute to glass rendering strategies
+/// @param {String} $scope - CSS custom property prefix (default: "glass")
+@mixin glass-attr($scope: "glass") {
+  // Default glass effect (when no data attribute)
+  background: var(--glass-bg-light, rgba(255, 255, 255, 0.1));
+  backdrop-filter: var(--glass-blur-light, blur(8px));
+
+  // Base glass rendering
+  &[data-glass] {
+    --#{$scope}-strategy: attr(data-glass);
+  }
+
+  // CSS-consistent blur variants
+  &[data-glass="blur-light"] {
+    @include glass.glass-faux("light", "medium");
+  }
+
+  &[data-glass="blur-dark"] {
+    @include glass.glass-faux("dark", "medium");
+  }
+
+  &[data-glass="blur-heavy"] {
+    @include glass.glass-faux("light", "heavy");
+  }
+
+  // GPU-intensive real blur variants
+  &[data-glass="frost-light"] {
+    @include glass.glass-real("light", "medium");
+  }
+
+  &[data-glass="frost-dark"] {
+    @include glass.glass-real("dark", "medium");
+  }
+
+  // No glass
+  &[data-glass="none"] {
+    background: transparent;
+    backdrop-filter: none;
+  }
+}
+
+/* ============================================================================
+   ELEVATION ATTRIBUTE MIXIN - data-elevation
+   ============================================================================ */
+
+/// Maps data-elevation attribute to box-shadow depths
+/// @param {String} $scope - CSS custom property prefix (default: "elevation")
+@mixin elevation-attr($scope: "elevation") {
+  // Default elevation (medium shadow)
+  box-shadow: var(--shadow-elevation-md);
+
+  // Elevation shadow maps with CSS-consistent naming
+  $elevations: (
+    "none": var(--shadow-elevation-none),
+    "flat": var(--shadow-elevation-flat),
+    "xs": var(--shadow-elevation-xs),
+    "sm": var(--shadow-elevation-sm),
+    "md": var(--shadow-elevation-md),
+    "lg": var(--shadow-elevation-lg),
+    "xl": var(--shadow-elevation-xl),
+    "2xl": var(--shadow-elevation-2xl),
+  );
+
+  // Hover elevation (enhanced)
+  $elevations-hover: (
+    "none": var(--shadow-elevation-hover-none),
+    "flat": var(--shadow-elevation-hover-none),
+    "xs": var(--shadow-elevation-hover-xs),
+    "sm": var(--shadow-elevation-hover-sm),
+    "md": var(--shadow-elevation-hover-md),
+    "lg": var(--shadow-elevation-hover-lg),
+    "xl": var(--shadow-elevation-hover-xl),
+    "2xl": var(--shadow-elevation-hover-2xl),
+  );
+
+  // Base elevation
+  &[data-elevation] {
+    --#{$scope}-level: attr(data-elevation);
+    box-shadow: map.get($elevations, var(--#{$scope}-level));
+  }
+
+  // Hover state enhancement
+  &:hover[data-elevation] {
+    box-shadow: map.get($elevations-hover, var(--#{$scope}-level));
+  }
+
+  // Specific elevation variants
+  @each $name, $shadow in $elevations {
+    &[data-elevation="#{$name}"] {
+      box-shadow: $shadow;
+    }
+
+    &:hover[data-elevation="#{$name}"] {
+      box-shadow: map.get($elevations-hover, $name);
+    }
+  }
+}
+
+/* ============================================================================
+   STATE ATTRIBUTE MIXIN - data-state
+   ============================================================================ */
+
+/// Maps data-state attribute to semantic state colors
+/// @param {String} $scope - CSS custom property prefix (default: "state")
+@mixin state-attr($scope: "state") {
+  // Default state (neutral)
+  color: var(--color-neutral-600);
+
+  // State color maps with CSS-consistent naming
+  $states: (
+    "neutral": var(--color-neutral-600),
+    "info": var(--color-info-600),
+    "success": var(--color-success-600),
+    "warning": var(--color-warning-600),
+    "error": var(--color-error-600),
+    "primary": var(--color-primary-600),
+    "secondary": var(--color-secondary-600),
+  );
+
+  // Background variants (10% opacity)
+  $states-bg: (
+    "neutral": var(--color-neutral-100),
+    "info": var(--color-info-100),
+    "success": var(--color-success-100),
+    "warning": var(--color-warning-100),
+    "error": var(--color-error-100),
+    "primary": var(--color-primary-100),
+    "secondary": var(--color-secondary-100),
+  );
+
+  // Border variants (20% opacity)
+  $states-border: (
+    "neutral": var(--color-neutral-200),
+    "info": var(--color-info-200),
+    "success": var(--color-success-200),
+    "warning": var(--color-warning-200),
+    "error": var(--color-error-200),
+    "primary": var(--color-primary-200),
+    "secondary": var(--color-secondary-200),
+  );
+
+  // Base state color
+  &[data-state] {
+    --#{$scope}-value: attr(data-state);
+    color: map.get($states, var(--#{$scope}-value));
+  }
+
+  // Background state variants
+  &[data-state-bg] {
+    --#{$scope}-bg-value: attr(data-state-bg);
+    background-color: map.get($states-bg, var(--#{$scope}-bg-value));
+  }
+
+  // Border state variants
+  &[data-state-border] {
+    --#{$scope}-border-value: attr(data-state-border);
+    border-color: map.get($states-border, var(--#{$scope}-border-value));
+  }
+
+  // Specific state variants
+  @each $name, $color in $states {
+    &[data-state="#{$name}"] {
+      color: $color;
+    }
+
+    &[data-state-bg="#{$name}"] {
+      background-color: map.get($states-bg, $name);
+    }
+
+    &[data-state-border="#{$name}"] {
+      border-color: map.get($states-border, $name);
+    }
+  }
+}
+
+/* ============================================================================
+   COLOR ATTRIBUTE MIXIN - data-color (Enhanced for Multiple Effects)
+   ============================================================================ */
+
+/// Maps data-color attribute to semantic colors for multiple styling contexts
+/// @param {String} $scope - CSS custom property prefix (default: "color")
+/// @param {String} $effect - Effect type: "text", "background", "border", "shadow", "glow" (default: "text")
+@mixin color-attr($scope: "color", $effect: "text") {
+  // Base color mapping with effect-specific variables
+  &[data-color] {
+    --#{$scope}-value: attr(data-color color, currentColor);
+    --#{$scope}-effect: #{$effect};
+  }
+
+  // Semantic color variants - dynamically applied based on effect
+  &[data-color="healthy"] {
+    --#{$scope}-color: #{tokens.$color-healthy};
+    @if $effect == "shadow" or $effect == "glow" {
+      --#{$scope}-color-alpha: #{tokens.$color-healthy}40;
+    } @else if $effect == "background" {
+      --#{$scope}-color-alpha: #{tokens.$color-healthy}10;
+    }
+  }
+
+  &[data-color="building"] {
+    --#{$scope}-color: #{tokens.$color-building};
+    @if $effect == "shadow" or $effect == "glow" {
+      --#{$scope}-color-alpha: #{tokens.$color-building}40;
+    } @else if $effect == "background" {
+      --#{$scope}-color-alpha: #{tokens.$color-building}10;
+    }
+  }
+
+  &[data-color="warning"] {
+    --#{$scope}-color: #{tokens.$color-warning};
+    @if $effect == "shadow" or $effect == "glow" {
+      --#{$scope}-color-alpha: #{tokens.$color-warning}40;
+    } @else if $effect == "background" {
+      --#{$scope}-color-alpha: #{tokens.$color-warning}10;
+    }
+  }
+
+  &[data-color="danger"] {
+    --#{$scope}-color: #{tokens.$color-danger};
+    @if $effect == "shadow" or $effect == "glow" {
+      --#{$scope}-color-alpha: #{tokens.$color-danger}40;
+    } @else if $effect == "background" {
+      --#{$scope}-color-alpha: #{tokens.$color-danger}10;
+    }
+  }
+
+  &[data-color="success"] {
+    --#{$scope}-color: #{tokens.$color-success};
+    @if $effect == "shadow" or $effect == "glow" {
+      --#{$scope}-color-alpha: #{tokens.$color-success}40;
+    } @else if $effect == "background" {
+      --#{$scope}-color-alpha: #{tokens.$color-success}10;
+    }
+  }
+
+  &[data-color="active"] {
+    --#{$scope}-color: #{tokens.$color-active};
+    @if $effect == "shadow" or $effect == "glow" {
+      --#{$scope}-color-alpha: #{tokens.$color-active}40;
+    } @else if $effect == "background" {
+      --#{$scope}-color-alpha: #{tokens.$color-active}10;
+    }
+  }
+
+  &[data-color="focus"] {
+    --#{$scope}-color: #{tokens.$color-focus};
+    @if $effect == "shadow" or $effect == "glow" {
+      --#{$scope}-color-alpha: #{tokens.$color-focus}40;
+    } @else if $effect == "background" {
+      --#{$scope}-color-alpha: #{tokens.$color-focus}10;
+    }
+  }
+
+  &[data-color="info"] {
+    --#{$scope}-color: #{tokens.$color-info};
+    @if $effect == "shadow" or $effect == "glow" {
+      --#{$scope}-color-alpha: #{tokens.$color-info}40;
+    } @else if $effect == "background" {
+      --#{$scope}-color-alpha: #{tokens.$color-info}10;
+    }
+  }
+
+  &[data-color="muted"] {
+    --#{$scope}-color: #{tokens.$color-muted};
+    @if $effect == "shadow" or $effect == "glow" {
+      --#{$scope}-color-alpha: #{tokens.$color-muted}40;
+    } @else if $effect == "background" {
+      --#{$scope}-color-alpha: #{tokens.$color-muted}10;
+    }
+  }
+
+  &[data-color="primary"] {
+    --#{$scope}-color: #{tokens.$color-primary};
+    @if $effect == "shadow" or $effect == "glow" {
+      --#{$scope}-color-alpha: #{tokens.$color-primary}40;
+    } @else if $effect == "background" {
+      --#{$scope}-color-alpha: #{tokens.$color-primary}10;
+    }
+  }
+
+  &[data-color="secondary"] {
+    --#{$scope}-color: #{tokens.$color-secondary};
+    @if $effect == "shadow" or $effect == "glow" {
+      --#{$scope}-color-alpha: #{tokens.$color-secondary}40;
+    } @else if $effect == "background" {
+      --#{$scope}-color-alpha: #{tokens.$color-secondary}10;
+    }
+  }
+
+  &[data-color="accent"] {
+    --#{$scope}-color: #{tokens.$color-accent};
+    @if $effect == "shadow" or $effect == "glow" {
+      --#{$scope}-color-alpha: #{tokens.$color-accent}40;
+    } @else if $effect == "background" {
+      --#{$scope}-color-alpha: #{tokens.$color-accent}10;
+    }
+  }
+}
+
+/* ============================================================================
+   BORDER ATTRIBUTE MIXIN - data-border (Enhanced for Multiple Effects)
+   ============================================================================ */
+
+/// Maps data-border attribute to border styles with color integration
+/// @param {String} $scope - CSS custom property prefix (default: "border")
+@mixin border-attr($scope: "border") {
+  // Include color-attr for border colorization
+  @include color-attr($scope, "border");
+
+  // Base border mapping
+  &[data-border] {
+    --#{$scope}-style: attr(data-border);
+    border-style: solid;
+  }
+
+  // Border width variants
+  &[data-border="none"] {
+    border-width: 0;
+  }
+
+  &[data-border="thin"] {
+    border-width: 1px;
+  }
+
+  &[data-border="default"] {
+    border-width: 1px;
+  }
+
+  &[data-border="medium"] {
+    border-width: 2px;
+  }
+
+  &[data-border="thick"] {
+    border-width: 3px;
+  }
+
+  &[data-border="heavy"] {
+    border-width: 4px;
+  }
+
+  // Border style variants
+  &[data-border="solid"] {
+    border-style: solid;
+  }
+
+  &[data-border="dashed"] {
+    border-style: dashed;
+  }
+
+  &[data-border="dotted"] {
+    border-style: dotted;
+  }
+
+  &[data-border="double"] {
+    border-style: double;
+  }
+
+  // Colorized borders using semantic colors
+  &[data-border="semantic"] {
+    border-color: var(--#{$scope}-color-alpha, rgba(0, 0, 0, 0.1));
+  }
+
+  &[data-border="semantic-solid"] {
+    border: 1px solid var(--#{$scope}-color-alpha, rgba(0, 0, 0, 0.1));
+  }
+
+  &[data-border="semantic-medium"] {
+    border: 2px solid var(--#{$scope}-color-alpha, rgba(0, 0, 0, 0.1));
+  }
+
+  // Legacy opacity variants (for backward compatibility)
+  &[data-border="subtle"] {
+    border: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  &[data-border="emphasis"] {
+    border: 1px solid rgba(0, 0, 0, 0.2);
+  }
+
+  &[data-border="strong"] {
+    border: 1px solid rgba(0, 0, 0, 0.3);
+  }
+
+  // Directional borders
+  &[data-border="top"] {
+    border-top: 1px solid var(--#{$scope}-color-alpha, rgba(0, 0, 0, 0.1));
+    border-right: none;
+    border-bottom: none;
+    border-left: none;
+  }
+
+  &[data-border="right"] {
+    border-top: none;
+    border-right: 1px solid var(--#{$scope}-color-alpha, rgba(0, 0, 0, 0.1));
+    border-bottom: none;
+    border-left: none;
+  }
+
+  &[data-border="bottom"] {
+    border-top: none;
+    border-right: none;
+    border-bottom: 1px solid var(--#{$scope}-color-alpha, rgba(0, 0, 0, 0.1));
+    border-left: none;
+  }
+
+  &[data-border="left"] {
+    border-top: none;
+    border-right: none;
+    border-bottom: none;
+    border-left: 1px solid var(--#{$scope}-color-alpha, rgba(0, 0, 0, 0.1));
+  }
+
+  // Special effect borders
+  &[data-border="glow"] {
+    border: 1px solid transparent;
+    box-shadow: inset 0 0 0 1px var(--#{$scope}-color-alpha, rgba(0, 0, 0, 0.1));
+  }
+
+  &[data-border="inner-glow"] {
+    border: 1px solid var(--#{$scope}-color-alpha, rgba(0, 0, 0, 0.1));
+    box-shadow: inset 0 0 4px var(--#{$scope}-color-alpha, rgba(0, 0, 0, 0.1));
+  }
+}
+
+/* ============================================================================
+   BORDER RADIUS ATTRIBUTE MIXIN - data-radius
+   ============================================================================ */
+
+/// Maps data-radius attribute to border-radius values
+/// @param {String} $scope - CSS custom property prefix (default: "radius")
+@mixin radius-attr($scope: "radius") {
+  // Base radius mapping
+  &[data-radius] {
+    --#{$scope}-value: attr(data-radius);
+  }
+
+  // Size variants
+  &[data-radius="none"] {
+    border-radius: 0;
+  }
+
+  &[data-radius="xs"] {
+    border-radius: var(--radius-xs, 0.125rem);
+  }
+
+  &[data-radius="sm"] {
+    border-radius: var(--radius-sm, 0.25rem);
+  }
+
+  &[data-radius="md"] {
+    border-radius: var(--radius-md, 0.375rem);
+  }
+
+  &[data-radius="lg"] {
+    border-radius: var(--radius-lg, 0.5rem);
+  }
+
+  &[data-radius="xl"] {
+    border-radius: var(--radius-xl, 0.75rem);
+  }
+
+  &[data-radius="2xl"] {
+    border-radius: var(--radius-2xl, 1rem);
+  }
+
+  &[data-radius="3xl"] {
+    border-radius: var(--radius-3xl, 1.5rem);
+  }
+
+  &[data-radius="full"] {
+    border-radius: var(--radius-full, 9999px);
+  }
+
+  // Pill shape (50% height)
+  &[data-radius="pill"] {
+    border-radius: 9999px;
+  }
+
+  // Directional radius
+  &[data-radius="top"] {
+    border-radius: var(--radius-lg, 0.5rem) var(--radius-lg, 0.5rem) 0 0;
+  }
+
+  &[data-radius="right"] {
+    border-radius: 0 var(--radius-lg, 0.5rem) var(--radius-lg, 0.5rem) 0;
+  }
+
+  &[data-radius="bottom"] {
+    border-radius: 0 0 var(--radius-lg, 0.5rem) var(--radius-lg, 0.5rem);
+  }
+
+  &[data-radius="left"] {
+    border-radius: var(--radius-lg, 0.5rem) 0 0 var(--radius-lg, 0.5rem);
+  }
+}
+
+/* ============================================================================
+   GLOW ATTRIBUTE MIXIN - data-glow
+   ============================================================================ */
+
+/// Maps data-glow attribute to colored shadow effects
+/// @param {String} $scope - CSS custom property prefix (default: "glow")
+@mixin glow-attr($scope: "glow") {
+  // Glow spread variants
+  $glow-spreads: (
+    "none": 0 0 0,
+    "subtle": 0 0 8px,
+    "medium": 0 0 12px,
+    "strong": 0 0 16px,
+    "intense": 0 0 24px,
+  );
+
+  // Base glow
+  &[data-glow] {
+    --#{$scope}-intensity: attr(data-glow);
+  }
+
+  // Glow variants
+  @each $name, $spread in $glow-spreads {
+    &[data-glow="#{$name}"] {
+      box-shadow: #{$spread} var(--color-color, rgba(0, 0, 0, 0.1));
+    }
+  }
+
+  // Special semantic glow
+  &[data-glow="semantic"] {
+    box-shadow: 0 0 12px var(--color-color, rgba(0, 0, 0, 0.1));
+  }
+
+  // Seed-based glow
+  &[data-glow="seed"] {
+    box-shadow: 0 0 12px var(--seed-color, rgba(0, 0, 0, 0.1));
+  }
+}
+
+/* ============================================================================
+   EFFECT ATTRIBUTE MIXIN - data-effect (Composable Effects System)
+   ============================================================================ */
+
+/// Maps data-effect attribute to composable visual effects using color-attr
+/// @param {String} $scope - CSS custom property prefix (default: "effect")
+@mixin effect-attr($scope: "effect") {
+  // Include color-attr for shadow effects
+  @include color-attr($scope, "shadow");
+
+  // Base effect mapping
+  &[data-effect] {
+    --#{$scope}-type: attr(data-effect);
+  }
+
+  // Inset glow variants (leverages color-attr shadow colors)
+  &[data-effect="inset-glow"] {
+    box-shadow: inset 0 0 20px
+      var(--#{$scope}-color-alpha, rgba(59, 130, 246, 0.4));
+  }
+
+  &[data-effect="inset-strong"] {
+    box-shadow: inset 0 0 30px
+      var(--#{$scope}-color-alpha, rgba(59, 130, 246, 0.6));
+  }
+
+  &[data-effect="inset-subtle"] {
+    box-shadow: inset 0 0 15px
+      var(--#{$scope}-color-alpha, rgba(59, 130, 246, 0.3));
+  }
+
+  // Outer glow variants
+  &[data-effect="outer-glow"] {
+    box-shadow: 0 0 20px var(--#{$scope}-color-alpha, rgba(59, 130, 246, 0.4));
+  }
+
+  &[data-effect="outer-strong"] {
+    box-shadow: 0 0 30px var(--#{$scope}-color-alpha, rgba(59, 130, 246, 0.6));
+  }
+
+  // Ring effects
+  &[data-effect="ring"] {
+    box-shadow: 0 0 0 2px var(--#{$scope}-color-alpha, rgba(59, 130, 246, 0.4));
+  }
+
+  &[data-effect="ring-strong"] {
+    box-shadow: 0 0 0 3px var(--#{$scope}-color-alpha, rgba(59, 130, 246, 0.6));
+  }
+}
+
+/// Maps data-glow attribute to glow effects
+/// @param {String} $scope - CSS custom property prefix (default: "glow")
+@mixin glow-attr($scope: "glow") {
+  // Default glow (subtle)
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+
+  // Glow effect maps with CSS-consistent naming
+  $glows: (
+    "none": 0 0 0 transparent,
+    "xs": 0 0 4px rgba(0, 0, 0, 0.05),
+    "sm": 0 0 8px rgba(0, 0, 0, 0.1),
+    "md": 0 0 16px rgba(0, 0, 0, 0.15),
+    "lg": 0 0 24px rgba(0, 0, 0, 0.2),
+    "xl": 0 0 32px rgba(0, 0, 0, 0.25),
+    "2xl": 0 0 48px rgba(0, 0, 0, 0.3),
+  );
+
+  // Colorized glow variants (when combined with data-color)
+  $glows-colorized: (
+    "xs": 0 0 4px,
+    "sm": 0 0 8px,
+    "md": 0 0 16px,
+    "lg": 0 0 24px,
+    "xl": 0 0 32px,
+    "2xl": 0 0 48px,
+  );
+
+  // Base glow
+  &[data-glow] {
+    --#{$scope}-level: attr(data-glow);
+    box-shadow: map.get($glows, var(--#{$scope}-level));
+  }
+
+  // Colorized glow (requires data-color)
+  &[data-glow][data-color] {
+    --#{$scope}-color: var(--color-attr-current);
+    box-shadow: map.get($glows-colorized, var(--#{$scope}-level))
+      var(--#{$scope}-color);
+  }
+
+  // Specific glow variants
+  @each $name, $glow in $glows {
+    &[data-glow="#{$name}"] {
+      box-shadow: $glow;
+    }
+
+    // Colorized variants
+    &[data-glow="#{$name}"][data-color] {
+      box-shadow: map.get($glows-colorized, $name) var(--color-attr-current);
+    }
+  }
+}
+
+/* ============================================================================
+   COMPOSITE ATTRIBUTE MIXINS - Combined Effects
+   ============================================================================ */
+
+/// All-in-one data attribute styling
+/// @param {String} $scope - CSS custom property prefix (default: "attr")
+@mixin data-attributes($scope: "attr") {
+  @include glass-attr($scope);
+  @include elevation-attr($scope);
+  @include state-attr($scope);
+  @include color-attr($scope);
+  @include border-attr($scope);
+  @include radius-attr($scope);
+  @include glow-attr($scope);
+  @include effect-attr($scope);
+}
+
+/// Background-focused attributes (glass + elevation + glow)
+/// @param {String} $scope - CSS custom property prefix (default: "bg")
+@mixin background-attributes($scope: "bg") {
+  @include glass-attr($scope);
+  @include elevation-attr($scope);
+  @include glow-attr($scope);
+}
+
+/// Interactive attributes (state + color)
+/// @param {String} $scope - CSS custom property prefix (default: "interactive")
+@mixin interactive-attributes($scope: "interactive") {
+  @include state-attr($scope);
+  @include color-attr($scope);
+}

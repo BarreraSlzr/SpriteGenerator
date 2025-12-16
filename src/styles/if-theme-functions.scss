@@ -1,0 +1,317 @@
+// InternetFriends Theme Functions
+// Single source of truth: CSS Custom Properties
+// Usage: background: if-color('primary') or @include if-component('primary-button')
+
+@use "sass:map";
+@use "sass:string";
+
+// Core InternetFriends color function - now references CSS variables
+@function if-color($key) {
+  $color-map: (
+    // Brand colors - reference CSS variables
+    "if-primary": var(--if-primary),
+    "if-accent": var(--if-accent),
+    "if-surface": var(--if-surface),
+    // System colors - reference CSS variables
+    "system-blue": var(--if-primary),
+    "system-blue-hover": var(--if-primary-hover),
+    "system-blue-active": var(--if-primary-active, var(--if-primary-hover)),
+    "system-blue-soft": var(--if-primary-light),
+    // Status colors - reference CSS variables
+    "status.success": var(--status-success, #10b981),
+    "status.warning": var(--status-warning, #f59e0b),
+    "status.danger": var(--status-danger, #ef4444),
+    "status.info": var(--status-info, var(--if-primary)),
+    // Text system - reference CSS variables
+    "text.primary": var(--color-text-primary),
+    "text.secondary": var(--color-text-secondary),
+    "text.tertiary": var(--color-text-tertiary),
+    "text.link": var(--color-text-link),
+    "text.inverse": var(--color-text-inverse),
+    // Border system - reference CSS variables
+    "border.subtle": var(--border-subtle, #e5e7eb),
+    "border.standard": var(--border-standard, #d1d5db),
+    "border.emphasis": var(--border-emphasis, #9ca3af),
+    "border.focus": var(--color-border-focus),
+    // Glass system - reference CSS variables
+    "glass.default": var(--color-bg-glass),
+    "glass.light": var(--glass-bg-medium),
+    "glass.dark": var(--glass-bg-strong),
+    // Hero canvas integration - reference CSS variables
+    "canvas.blend-light": var(--canvas-blend-light),
+    "canvas.blend-dark": var(--canvas-blend-dark),
+    "canvas.text-contrast-light": var(--canvas-text-contrast-light),
+    "canvas.text-contrast-dark": var(--canvas-text-contrast-dark),
+    "hero.bg-overlay": var(--hero-bg-canvas-overlay),
+    "hero.bg-gradient": var(--hero-bg-gradient-overlay)
+  );
+
+  @return map.get($color-map, $key);
+}
+
+// Spacing function - references CSS variables
+@function if-space($key) {
+  $spacing: (
+    "1": var(--space-1, 0.25rem),
+    "2": var(--space-2, 0.5rem),
+    "3": var(--space-3, 0.75rem),
+    "4": var(--space-4, 1rem),
+    "5": var(--space-5, 1.25rem),
+    "6": var(--space-6, 1.5rem),
+    "8": var(--space-8, 2rem),
+    "10": var(--space-10, 2.5rem),
+    "12": var(--space-12, 3rem),
+    "16": var(--space-16, 4rem),
+    "20": var(--space-20, 5rem),
+    // Semantic spacing - reference CSS variables
+    "component-gap-sm": var(--space-component-gap-sm, 0.75rem),
+    "component-gap-md": var(--space-component-gap-md, 1rem),
+    "component-gap-lg": var(--space-component-gap-lg, 1.5rem),
+    "section-padding-sm": var(--space-section-padding-sm, 2rem),
+    "section-padding-md": var(--space-section-padding-md, 3rem),
+    "section-padding-lg": var(--space-section-padding-lg, 4rem),
+    "section-padding-xl": var(--space-section-padding-xl, 6rem),
+  );
+
+  @return map.get($spacing, $key);
+}
+
+// Border radius function - references CSS variables
+@function if-radius($key) {
+  $radius: (
+    "xs": var(--radius-xs, 2px),
+    "sm": var(--radius-sm, 4px),
+    "md": var(--radius-md, 6px),
+    "lg": var(--radius-lg, 8px),
+    "xl": var(--radius-xl, 12px),
+    "compact-xs": var(--radius-xs, 2px),
+    "compact-sm": var(--radius-sm, 4px),
+    "compact-md": var(--radius-md, 6px),
+    "compact-lg": var(--radius-lg, 8px),
+    "compact-xl": var(--radius-xl, 12px),
+  );
+
+  @return map.get($radius, $key);
+}
+
+// Shadow function - references CSS variables
+@function if-shadow($key) {
+  $shadows: (
+    "sm": var(--shadow-sm),
+    "md": var(--shadow-md),
+    "lg": var(--shadow-lg),
+    "glass-sm": var(
+        --shadow-glass-sm,
+        "0 1px 2px 0 rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.1)"
+      ),
+    "glass-md": var(
+        --shadow-glass-md,
+        "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.1)"
+      ),
+    "glass-lg": var(
+        --shadow-glass-lg,
+        "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.1)"
+      ),
+    "focus": var(--shadow-focus, "0 0 0 2px rgba(59, 130, 246, 0.5)"),
+  );
+
+  @return map.get($shadows, $key);
+}
+
+// Typography function - references CSS variables
+@function if-typography($key) {
+  $typography: (
+    "hero-title-sm": var(--hero-title-sm),
+    "hero-title-md": var(--hero-title-md),
+    "hero-title-lg": var(--hero-title-lg),
+    "hero-title-xl": var(--hero-title-xl),
+    "hero-subtitle": var(--hero-subtitle),
+  );
+
+  @return map.get($typography, $key);
+}
+
+// Component mixins using InternetFriends design system
+@mixin if-component($type) {
+  @if $type == "primary-button" {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: if-color("system-blue");
+    color: if-color("text.inverse");
+    padding: if-space("3") if-space("4");
+    border-radius: if-radius("md");
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    border: none;
+
+    &:hover:not(:disabled) {
+      background: if-color("system-blue-hover");
+      transform: translateY(-1px);
+      box-shadow: if-shadow("md");
+    }
+
+    &:active {
+      background: if-color("system-blue-active");
+      transform: translateY(0);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: var(--focus-ring);
+    }
+  } @else if $type == "secondary-button" {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: transparent;
+    color: if-color("text.primary");
+    border: 1px solid if-color("border.standard");
+    padding: if-space("3") if-space("4");
+    border-radius: if-radius("md");
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      background: if-color("if-surface");
+      border-color: if-color("border.emphasis");
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: var(--focus-ring);
+    }
+  } @else if $type == "glass-card" {
+    background: if-color("glass.default");
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid if-color("glass.light");
+    border-radius: if-radius("lg");
+    box-shadow: if-shadow("glass-md");
+
+    &:hover {
+      border-color: if-color("glass.light");
+      box-shadow: if-shadow("glass-lg");
+    }
+  } @else if $type == "card" {
+    background: white;
+    border: 1px solid if-color("border.subtle");
+    border-radius: if-radius("lg");
+    padding: if-space("6");
+    box-shadow: if-shadow("sm");
+
+    &:hover {
+      box-shadow: if-shadow("md");
+      border-color: if-color("border.standard");
+    }
+  } @else if $type == "input" {
+    width: 100%;
+    padding: if-space("3") if-space("4");
+    border: 1px solid if-color("border.standard");
+    border-radius: if-radius("md");
+    background: white;
+    color: if-color("text.primary");
+    font-size: 0.875rem;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+
+    &::placeholder {
+      color: if-color("text.tertiary");
+    }
+
+    &:focus {
+      outline: none;
+      border-color: if-color("border.focus");
+      box-shadow: var(--focus-ring);
+    }
+
+    &:disabled {
+      background: if-color("if-surface");
+      color: if-color("text.tertiary");
+      cursor: not-allowed;
+    }
+  } @else if $type == "hero-title" {
+    font-weight: bold;
+    font-size: if-typography("hero-title-sm");
+    color: if-color("canvas.text-contrast-light");
+    transition: var(--theme-transition-color);
+
+    [data-theme="dark"] & {
+      color: if-color("canvas.text-contrast-dark");
+    }
+
+    @media (min-width: 768px) {
+      font-size: if-typography("hero-title-md");
+    }
+
+    @media (min-width: 1024px) {
+      font-size: if-typography("hero-title-lg");
+    }
+  } @else if $type == "hero-container" {
+    background: if-color("canvas.blend-light");
+    transition: var(--theme-transition-bg), var(--theme-transition-canvas);
+    position: relative;
+    overflow: hidden; /* Ensure background layer is properly contained */
+    display: flex; /* Ensure proper layout */
+    flex-direction: column; /* Stack content vertically */
+
+    [data-theme="dark"] & {
+      background: if-color("canvas.blend-dark");
+    }
+
+    &[data-background="true"] {
+      background: transparent;
+    }
+  } @else if $type == "section-container" {
+    max-width: 56rem;
+    margin: 0 auto;
+    padding: if-space("section-padding-md") if-space("4");
+
+    @media (min-width: 768px) {
+      padding: if-space("section-padding-lg") if-space("6");
+    }
+  } @else if $type == "responsive-grid" {
+    display: grid;
+    gap: if-space("6");
+    grid-template-columns: 1fr;
+
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (min-width: 1024px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+}
+
+// Main InternetFriends function for easy access - now references CSS variables
+@function InternetFriends($key) {
+  // Parse the key to determine type
+  @if string.index($key, "color.") == 1 {
+    $color-key: string.slice($key, 7); // Remove 'color.' prefix
+    @return if-color($color-key);
+  } @else if string.index($key, "space.") == 1 {
+    $space-key: string.slice($key, 7); // Remove 'space.' prefix
+    @return if-space($space-key);
+  } @else if string.index($key, "radius.") == 1 {
+    $radius-key: string.slice($key, 8); // Remove 'radius.' prefix
+    @return if-radius($radius-key);
+  } @else if string.index($key, "shadow.") == 1 {
+    $shadow-key: string.slice($key, 8); // Remove 'shadow.' prefix
+    @return if-shadow($shadow-key);
+  } @else if string.index($key, "typography.") == 1 {
+    $typo-key: string.slice($key, 12); // Remove 'typography.' prefix
+    @return if-typography($typo-key);
+  }
+
+  // Direct color access (backwards compatibility) - now references CSS variables
+  @else {
+    @return if-color($key);
+  }
+}

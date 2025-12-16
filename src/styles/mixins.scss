@@ -1,0 +1,826 @@
+@use "sass:map";
+@use "design-tokens" as *;
+@use "tokens-semantic" as tokens;
+
+/* Forward glass, interaction, unified backgrounds, semantic colors, and data-attributes mixins to consumers */
+@forward "mixins-glass-system";
+@forward "mixins-interaction-system";
+@forward "mixins-backgrounds";
+@forward "mixins-data-attributes";
+@forward "mixins-semantic-colors";
+
+/* Also use them locally in this file */
+@use "mixins-glass-system" as *;
+@use "mixins-interaction-system" as *;
+@use "mixins-backgrounds" as *;
+@use "mixins-data-attributes" as *;
+@use "mixins-semantic-colors" as *;
+
+/* InternetFriends SCSS Mixins */
+
+/* === FLEX LAYOUT MIXINS === */
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin flex-start {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+@mixin flex-column-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* === GLASS MORPHISM MIXINS === */
+
+@mixin glass-base {
+  backdrop-filter: var(--glass-backdrop-blur);
+  -webkit-backdrop-filter: var(--glass-backdrop-blur);
+  border-radius: var(--radius-lg);
+}
+
+@mixin glass-subtle {
+  @include glass-base;
+  background: var(--glass-bg-subtle);
+  border: 1px solid var(--glass-border-subtle);
+}
+
+@mixin glass-medium {
+  @include glass-base;
+  background: var(--glass-bg-medium);
+  border: 1px solid var(--glass-border-medium);
+}
+
+@mixin glass-strong {
+  @include glass-base;
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-border-strong);
+}
+
+@mixin glass-card {
+  @include glass-base;
+  background: var(--glass-bg-card);
+  border: 1px solid var(--glass-border-medium);
+  box-shadow: var(--shadow-glass);
+  padding: var(--space-6);
+}
+
+@mixin glass-effect(
+  $blur: 12px,
+  $opacity: 0.1,
+  $border-opacity: 0.2,
+  $radius: var(--radius-lg)
+) {
+  @include glass-base;
+  -webkit-backdrop-filter: blur($blur);
+  backdrop-filter: blur($blur);
+  background: rgba(255, 255, 255, $opacity);
+  border: 1px solid rgba(255, 255, 255, $border-opacity);
+  border-radius: $radius;
+  box-shadow: var(--shadow-glass);
+}
+
+$elevation-map: (
+  xs: var(--shadow-elevation-xs, 0 1px 2px rgba(15, 23, 42, 0.08)),
+  sm: var(--shadow-elevation-sm, 0 4px 8px rgba(15, 23, 42, 0.12)),
+  md: var(--shadow-elevation-md, 0 8px 16px rgba(15, 23, 42, 0.16)),
+  lg: var(--shadow-elevation-lg, 0 12px 24px rgba(15, 23, 42, 0.18)),
+  xl: var(--shadow-elevation-xl, 0 16px 32px rgba(15, 23, 42, 0.22)),
+  2xl: var(--shadow-elevation-2xl, 0 20px 40px rgba(15, 23, 42, 0.25)),
+);
+
+@mixin elevation($level: sm) {
+  $shadow: map.get($elevation-map, $level);
+
+  @if $shadow == null {
+    $shadow: map.get($elevation-map, "md");
+  }
+
+  box-shadow: $shadow;
+}
+
+@mixin glass-button {
+  @include glass-base;
+  background: var(--glass-bg-button);
+  border: 1px solid var(--glass-border-subtle);
+  padding: var(--space-3) var(--space-4);
+  transition: all var(--duration-standard) var(--easing-standard);
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: var(--glass-bg-subtle);
+    border-color: var(--glass-border-medium);
+    transform: var(--transform-lift);
+  }
+
+  &:active {
+    transform: var(--transform-press);
+  }
+}
+
+@mixin glass-input {
+  @include glass-base;
+  background: var(--glass-bg-input);
+  border: 1px solid var(--glass-border-subtle);
+  padding: var(--space-3) var(--space-4);
+  transition: all var(--duration-standard) var(--easing-standard);
+
+  &:focus {
+    outline: none;
+    border-color: var(--glass-border-strong);
+    background: var(--glass-bg-subtle);
+    box-shadow: var(--focus-ring);
+  }
+}
+
+/* === HOVER EFFECT MIXINS === */
+
+@mixin hover-lift {
+  transition: all var(--duration-standard) var(--easing-standard);
+
+  &:hover:not(:disabled) {
+    transform: var(--transform-lift);
+  }
+}
+
+@mixin hover-lift-strong {
+  transition: all var(--duration-standard) var(--easing-standard);
+
+  &:hover:not(:disabled) {
+    transform: var(--transform-float-up);
+  }
+}
+
+@mixin hover-glass-enhance {
+  transition: all var(--duration-standard) var(--easing-standard);
+
+  &:hover:not(:disabled) {
+    background: var(--glass-bg-medium);
+    border-color: var(--glass-border-enhanced);
+    transform: var(--transform-lift);
+  }
+}
+
+/* === FOCUS STATE MIXINS === */
+
+@mixin focus-outline {
+  &:focus-visible {
+    outline: 2px solid var(--color-border-focus);
+    outline-offset: 2px;
+  }
+}
+
+@mixin focus-glass {
+  &:focus-visible {
+    outline: 2px dashed var(--color-border-focus);
+    outline-offset: 2px;
+    border-color: var(--glass-border-strong);
+    background: var(--glass-bg-medium);
+  }
+}
+
+/* === ANIMATION MIXINS === */
+
+@mixin float-animation {
+  animation: var(--animation-float);
+}
+
+@mixin float-animation-subtle {
+  animation: var(--animation-float-subtle);
+}
+
+/* === COMPONENT STATE MIXINS === */
+
+@mixin primary-state {
+  background: var(--primary-bg-medium);
+  border-color: var(--glass-border-strong);
+  color: var(--color-text-primary);
+}
+
+@mixin success-state {
+  background: var(--success-bg);
+  border-color: rgba(34, 197, 94, 0.3);
+  color: var(--color-text-primary);
+}
+
+@mixin warning-state {
+  background: var(--warning-bg);
+  border-color: rgba(251, 191, 36, 0.4);
+  color: var(--color-text-primary);
+}
+
+@mixin error-state {
+  background: var(--error-bg);
+  border-color: rgba(220, 53, 69, 0.2);
+  color: var(--color-text-primary);
+}
+
+@mixin purple-state {
+  background: var(--purple-bg);
+  border-color: rgba(168, 85, 247, 0.3);
+  color: var(--color-text-primary);
+}
+
+/* === RESPONSIVE MIXINS === */
+
+@mixin mobile-only {
+  @media (max-width: 767px) {
+    @content;
+  }
+}
+
+@mixin tablet-up {
+  @media (min-width: 768px) {
+    @content;
+  }
+}
+
+@mixin desktop-up {
+  @media (min-width: 1024px) {
+    @content;
+  }
+}
+
+/* === KEYFRAME ANIMATIONS === */
+
+@keyframes float {
+  0%,
+  100% {
+    transform: var(--transform-float-down);
+  }
+  50% {
+    transform: var(--transform-float-up);
+  }
+}
+
+/* === TABLE-SPECIFIC MIXINS === */
+
+// Sticky cell with glass effect (no border-radius for table cells)
+@mixin sticky-cell-glass($side: left) {
+  position: sticky;
+  #{$side}: 0;
+  background: var(--glass-bg-medium);
+}
+
+// Table cell separator gradient (vertical line)
+@mixin cell-separator($side: right) {
+  content: "";
+  position: absolute;
+  top: 0;
+  #{$side}: -1px;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--glass-border) 50%,
+    transparent
+  );
+}
+
+/* === TEXT COLOR UTILITIES === */
+
+// Primary text color (high contrast)
+@mixin text-primary {
+  color: hsl(var(--foreground));
+}
+
+// Secondary text color (medium contrast)
+@mixin text-secondary {
+  color: hsl(var(--muted-foreground));
+}
+
+// Accent text color
+@mixin text-accent {
+  color: hsl(var(--primary));
+}
+
+@mixin sticky-attr($offset: 0, $side: false) {
+  @if $side == "left" or $side == "right" or $side == "top" or $side == "bottom"
+  {
+    &[data-sticky="#{$side}"] {
+      position: sticky;
+      z-index: 2;
+      #{$side}: $offset;
+      background: linear-gradient(
+        if($side == "left", 155deg, 185deg),
+        var(--color-bg) 40%,
+        transparent 133%
+      );
+    }
+  }
+}
+
+// Blur overlay element for sticky graph column
+@mixin blurOverlay($blur: 2px, $to: right) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  width: var(--graph-column-width);
+  height: 100%; // Will be overridden by JS
+  pointer-events: none;
+
+  // Solid background with alpha mask for precise gradient control
+  background: var(--glass-bg-subtle);
+
+  // CSS mask-image for smoother fade (WebKit prefix for Safari)
+  -webkit-mask-image: linear-gradient(
+    to $to,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.95) 66%,
+    rgba(0, 0, 0, 0.7) 77%,
+    rgba(0, 0, 0, 0.3) 96%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to $to,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.7) 77%,
+    rgba(0, 0, 0, 0.3) 96%,
+    transparent 100%
+  );
+
+  backdrop-filter: blur($blur);
+  transition: opacity 0.3s ease;
+}
+
+// Vertical blur overlay with mask fade (top or bottom)
+// - $to: top | bottom
+// - $blur: blur strength
+// - $bg: base background for tint/glass consistency
+// - $curve: linear | ease-in (controls fade curve)
+@mixin blurOverlayVertical(
+  $blur: 14px,
+  $to: top,
+  $bg: var(--glass-bg-subtle),
+  $curve: linear
+) {
+  pointer-events: none;
+  background: $bg;
+  -webkit-backdrop-filter: blur($blur);
+  backdrop-filter: blur($blur);
+
+  // Smooth vertical fade using mask for Safari and standard engines
+  @if $to == top {
+    @if $curve == linear {
+      -webkit-mask-image: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 1) 0%,
+        rgba(0, 0, 0, 0.9) 40%,
+        rgba(0, 0, 0, 0.4) 75%,
+        transparent 100%
+      );
+      mask-image: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 1) 0%,
+        rgba(0, 0, 0, 0.9) 40%,
+        rgba(0, 0, 0, 0.4) 75%,
+        transparent 100%
+      );
+    } @else if $curve == ease-in {
+      -webkit-mask-image: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 1) 0%,
+        rgba(0, 0, 0, 0.95) 20%,
+        rgba(0, 0, 0, 0.8) 50%,
+        rgba(0, 0, 0, 0.3) 80%,
+        transparent 100%
+      );
+      mask-image: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 1) 0%,
+        rgba(0, 0, 0, 0.95) 20%,
+        rgba(0, 0, 0, 0.8) 50%,
+        rgba(0, 0, 0, 0.3) 80%,
+        transparent 100%
+      );
+    }
+  } @else if $to == bottom {
+    @if $curve == linear {
+      -webkit-mask-image: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 1) 0%,
+        rgba(0, 0, 0, 0.9) 40%,
+        rgba(0, 0, 0, 0.4) 75%,
+        transparent 100%
+      );
+      mask-image: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 1) 0%,
+        rgba(0, 0, 0, 0.9) 40%,
+        rgba(0, 0, 0, 0.4) 75%,
+        transparent 100%
+      );
+    } @else if $curve == ease-in {
+      -webkit-mask-image: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 1) 0%,
+        rgba(0, 0, 0, 0.95) 20%,
+        rgba(0, 0, 0, 0.8) 50%,
+        rgba(0, 0, 0, 0.3) 80%,
+        transparent 100%
+      );
+      mask-image: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 1) 0%,
+        rgba(0, 0, 0, 0.95) 20%,
+        rgba(0, 0, 0, 0.8) 50%,
+        rgba(0, 0, 0, 0.3) 80%,
+        transparent 100%
+      );
+    }
+  }
+}
+
+/* === INTERACTION: CLICKABLE TARGET === */
+// Generic clickable pattern for buttons, tabs, and pills
+// - Provides pointer cursor, no text selection, subtle lift on hover,
+//   and press feedback on active. Includes accessible focus outline.
+@mixin clickable {
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  transition: all var(--duration-standard) var(--easing-standard);
+
+  @include focus-outline;
+
+  &:disabled,
+  &[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  &:hover:not(:disabled):not([aria-disabled="true"]) {
+    transform: var(--transform-lift);
+  }
+
+  &:active:not(:disabled):not([aria-disabled="true"]) {
+    transform: var(--transform-press);
+  }
+}
+
+/* ============================================================================
+   COLORIZATION SYSTEM - Data-Attribute Color Management
+   ============================================================================
+   
+   A composable system for managing semantic colors via data-color attributes.
+   Inspired by sticky-attr pattern - provides consistency and reusability.
+   
+   Usage:
+   @include colorized("pulse");     // Creates --pulse-color variable
+   @include colorized("border");    // Creates --border-color variable
+   @include colorized("text");      // Creates --text-color variable
+   
+   Benefits:
+   - Single source of truth for color mapping
+   - Consistent naming: data-color="healthy|building|warning|active|primary"
+   - Extensible: add new colors without duplicating code
+   - Scope-aware: different features can use same color names with different vars
+   ============================================================================ */
+
+@mixin colorized($scope: "theme") {
+  // Future CSS attr() support - currently not widely supported but future-proof
+  &[data-color] {
+    --#{$scope}-color: attr(data-color color, currentColor);
+  }
+
+  // Fallback semantic color values (current browser support)
+  &[data-color="healthy"] {
+    --#{$scope}-color: #22c55e; // green-500
+  }
+
+  &[data-color="building"] {
+    --#{$scope}-color: #f59e0b; // amber-500
+  }
+
+  &[data-color="warning"] {
+    --#{$scope}-color: #ef4444; // red-500
+  }
+
+  &[data-color="active"] {
+    --#{$scope}-color: #a855f7; // purple-500
+  }
+
+  &[data-color="primary"] {
+    --#{$scope}-color: var(--if-primary); // theme primary
+  }
+
+  &[data-color="success"] {
+    --#{$scope}-color: #10b981; // emerald-500
+  }
+
+  &[data-color="info"] {
+    --#{$scope}-color: #3b82f6; // blue-500
+  }
+
+  &[data-color="muted"] {
+    --#{$scope}-color: var(--color-text-secondary); // theme muted
+  }
+}
+
+/* ============================================================================
+   PULSE ANIMATION SYSTEM - Composable Pulsing Effects
+   ============================================================================
+   
+   Reusable pulse animations that work with colorized system.
+   Supports multiple CSS properties: box-shadow, text-shadow, filter, etc.
+   
+   Usage:
+   .statusBadge {
+     @include pulse-attr();                    // Default: inset box-shadow
+     @include pulse-attr("text-shadow");       // Text glow pulse
+     @include pulse-attr("filter");            // Drop-shadow pulse
+   }
+   
+   HTML:
+   <div class="statusBadge" data-color="healthy">Live</div>
+   <span class="glowText" data-color="active">Active</span>
+   ============================================================================ */
+
+// Keyframes for inset glow pulse
+@keyframes pulse-glow-inset {
+  0%,
+  100% {
+    box-shadow:
+      inset 0 0 0 0 var(--pulse-color, currentColor),
+      var(--shadow-glass, 0 1px 3px rgba(0, 0, 0, 0.1));
+  }
+  50% {
+    box-shadow:
+      inset 0 0 12px 3px var(--pulse-color, currentColor),
+      var(--shadow-glass-md, 0 4px 6px rgba(0, 0, 0, 0.1));
+  }
+}
+
+// Keyframes for outset glow pulse
+@keyframes pulse-glow-outset {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 var(--pulse-color, currentColor),
+      var(--shadow-glass, 0 1px 3px rgba(0, 0, 0, 0.1));
+  }
+  50% {
+    box-shadow:
+      0 0 12px 4px var(--pulse-color, currentColor),
+      var(--shadow-glass-md, 0 4px 6px rgba(0, 0, 0, 0.1));
+  }
+}
+
+// Keyframes for text shadow pulse
+@keyframes pulse-glow-text {
+  0%,
+  100% {
+    text-shadow: 0 0 0 var(--pulse-color, currentColor);
+  }
+  50% {
+    text-shadow:
+      0 0 8px var(--pulse-color, currentColor),
+      0 0 16px var(--pulse-color, currentColor);
+  }
+}
+
+// Keyframes for drop-shadow filter pulse (follows SVG paths)
+@keyframes pulse-glow-filter {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 0 var(--pulse-color, currentColor));
+  }
+  50% {
+    filter: drop-shadow(0 0 4px var(--pulse-color, currentColor))
+      drop-shadow(0 0 8px var(--pulse-color, currentColor));
+  }
+}
+
+// Main pulse mixin - applies colorization and animation
+@mixin pulse-attr($property: "box-shadow", $variant: "inset") {
+  position: relative;
+  @include colorized("pulse");
+
+  @if $property == "box-shadow" {
+    @if $variant == "inset" {
+      animation: pulse-glow-inset 2.5s ease-in-out infinite;
+    } @else if $variant == "outset" {
+      animation: pulse-glow-outset 2.5s ease-in-out infinite;
+    }
+  } @else if $property == "text-shadow" {
+    animation: pulse-glow-text 2.5s ease-in-out infinite;
+  } @else if $property == "filter" or $property == "drop-shadow" {
+    animation: pulse-glow-filter 2.5s ease-in-out infinite;
+  }
+}
+
+// Utility classes for quick application
+.pulsing {
+  @include pulse-attr();
+}
+
+.pulsing-outset {
+  @include pulse-attr("box-shadow", "outset");
+}
+
+.pulsing-text {
+  @include pulse-attr("text-shadow");
+}
+
+.pulsing-filter {
+  @include pulse-attr("filter");
+}
+
+/* ============================================================================
+   STATE VARIANTS SYSTEM - DRY Semantic State Styling
+   ============================================================================
+   
+   Unified system for applying semantic state colors across multiple CSS properties.
+   Eliminates 40-80 lines of duplicated code per component.
+   
+   Usage:
+   .statusBadge {
+     @include state-variants("color");       // Text color only
+     @include state-variants("background");  // Background + border
+     @include state-variants("all");         // Color + background + border
+   }
+   
+   HTML:
+   <div class="statusBadge" data-status="healthy">Live</div>
+   <div class="statusBadge" data-status="building">Building</div>
+   <div class="statusBadge" data-status="warning">Warning</div>
+   
+   Replaces:
+   &[data-status="healthy"] {
+     color: #22c55e;
+     background: rgba(34, 197, 94, 0.1);
+     border: 1px solid rgba(34, 197, 94, 0.2);
+   }
+   // ... 40+ more lines for other states
+   
+   With:
+   @include state-variants("all"); // 1 line!
+   ============================================================================ */
+
+@mixin state-variants(
+  $property: "color",
+  $bg-opacity: 0.1,
+  $border-opacity: 0.2
+) {
+  // Healthy state (green - success, live, operational)
+  &[data-status="healthy"],
+  &[data-state="healthy"] {
+    @if $property == "color" or $property == "all" {
+      color: tokens.$color-healthy;
+    }
+    @if $property == "background" or $property == "all" {
+      background: tokens.opacity(tokens.$color-healthy, $bg-opacity);
+    }
+    @if $property == "border" or $property == "all" {
+      border: 1px solid tokens.opacity(tokens.$color-healthy, $border-opacity);
+    }
+  }
+
+  // Building state (amber - in progress, pending)
+  &[data-status="building"],
+  &[data-state="building"] {
+    @if $property == "color" or $property == "all" {
+      color: tokens.$color-building;
+    }
+    @if $property == "background" or $property == "all" {
+      background: tokens.opacity(tokens.$color-building, $bg-opacity);
+    }
+    @if $property == "border" or $property == "all" {
+      border: 1px solid tokens.opacity(tokens.$color-building, $border-opacity);
+    }
+  }
+
+  // Warning state (red - error, critical, attention needed)
+  &[data-status="warning"],
+  &[data-state="warning"] {
+    @if $property == "color" or $property == "all" {
+      color: tokens.$color-warning;
+    }
+    @if $property == "background" or $property == "all" {
+      background: tokens.opacity(tokens.$color-warning, $bg-opacity);
+    }
+    @if $property == "border" or $property == "all" {
+      border: 1px solid tokens.opacity(tokens.$color-warning, $border-opacity);
+    }
+  }
+
+  // Danger state (darker red - critical failure)
+  &[data-status="danger"],
+  &[data-state="danger"] {
+    @if $property == "color" or $property == "all" {
+      color: tokens.$color-danger;
+    }
+    @if $property == "background" or $property == "all" {
+      background: tokens.opacity(tokens.$color-danger, $bg-opacity);
+    }
+    @if $property == "border" or $property == "all" {
+      border: 1px solid tokens.opacity(tokens.$color-danger, $border-opacity);
+    }
+  }
+
+  // Success state (emerald - completed, verified)
+  &[data-status="success"],
+  &[data-state="success"] {
+    @if $property == "color" or $property == "all" {
+      color: tokens.$color-success;
+    }
+    @if $property == "background" or $property == "all" {
+      background: tokens.opacity(tokens.$color-success, $bg-opacity);
+    }
+    @if $property == "border" or $property == "all" {
+      border: 1px solid tokens.opacity(tokens.$color-success, $border-opacity);
+    }
+  }
+
+  // Active state (purple - selected, current, active)
+  &[data-status="active"],
+  &[data-state="active"] {
+    @if $property == "color" or $property == "all" {
+      color: tokens.$color-active;
+    }
+    @if $property == "background" or $property == "all" {
+      background: tokens.opacity(tokens.$color-active, $bg-opacity);
+    }
+    @if $property == "border" or $property == "all" {
+      border: 1px solid tokens.opacity(tokens.$color-active, $border-opacity);
+    }
+  }
+
+  // Info state (blue - informational, note)
+  &[data-status="info"],
+  &[data-state="info"] {
+    @if $property == "color" or $property == "all" {
+      color: tokens.$color-info;
+    }
+    @if $property == "background" or $property == "all" {
+      background: tokens.opacity(tokens.$color-info, $bg-opacity);
+    }
+    @if $property == "border" or $property == "all" {
+      border: 1px solid tokens.opacity(tokens.$color-info, $border-opacity);
+    }
+  }
+
+  // Muted state (gray - disabled, inactive, secondary)
+  &[data-status="muted"],
+  &[data-state="muted"] {
+    @if $property == "color" or $property == "all" {
+      color: tokens.$color-muted;
+    }
+    @if $property == "background" or $property == "all" {
+      background: tokens.opacity(tokens.$color-muted, $bg-opacity);
+    }
+    @if $property == "border" or $property == "all" {
+      border: 1px solid tokens.opacity(tokens.$color-muted, $border-opacity);
+    }
+  }
+}
+
+/* ============================================================================
+   SEED-BASED COLORIZATION - Deterministic Color Assignment
+   ============================================================================
+   
+   Uses modulo calculation on data-seed-mod attribute for infinite color variations.
+   Pairs with TypeScript utilities in lib/utils/seed-colorization.ts
+   
+   Usage:
+   .userAvatar {
+     @include seed-variants();
+   }
+   
+   TypeScript:
+   const { seedMod } = useSeedColor("user-john-doe");
+   <div className="userAvatar" data-seed-mod={seedMod}>JD</div>
+   
+   Benefits:
+   - Deterministic: same seed = same color always
+   - Infinite variations: works for any number of items
+   - Consistent: colors stable across sessions
+   - No duplication: color logic in one place
+   ============================================================================ */
+
+@mixin seed-variants($bg-opacity: 0.1, $border-opacity: 0.2) {
+  // Import seed colorization from tokens
+  @include tokens.seed-colorize("seed", $bg-opacity, $border-opacity);
+}

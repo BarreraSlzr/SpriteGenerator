@@ -1,0 +1,479 @@
+/* ============================================================================
+   UNIFIED BACKGROUNDS SYSTEM - DRY Composition Layer
+   ============================================================================
+   
+   Consolidates:
+   - Glass/Blur rendering (real/faux/none)
+   - Box-shadow elevations & glows
+   - Border styling & radius
+   - State management (hover/focus/active)
+   - Semantic & seed colorization
+   
+   Philosophy:
+   - ONE mixin call replaces 15-20 lines
+   - Composable parameters
+   - Built on existing glass + interaction systems
+   - DRY + KISS + SOLID principles
+   
+   Usage:
+   .card {
+     @include background(
+       $glass: "faux-light",
+       $elevation: "md",
+       $glow: "semantic",
+       $border: "subtle",
+       $states: true,
+       $semantic: "healthy"
+     );
+   }
+   
+   ============================================================================ */
+
+@use "sass:map";
+@use "sass:string";
+@use "tokens-semantic" as tokens;
+@use "mixins-glass-system" as glass;
+@use "mixins-interaction-system" as interact;
+
+/* ============================================================================
+   HELPER MAPS - Consolidate patterns from existing systems
+   ============================================================================ */
+
+// Elevation presets (from interaction system)
+$elevations: (
+  "flat": var(--shadow-elevation-flat),
+  "sm": var(--shadow-elevation-sm),
+  "md": var(--shadow-elevation-md, 0 4px 8px rgba(0, 0, 0, 0.12)),
+  "lg": var(--shadow-elevation-lg, 0 8px 16px rgba(0, 0, 0, 0.16)),
+  "xl": var(--shadow-elevation-xl, 0 16px 32px rgba(0, 0, 0, 0.2)),
+  "2xl": var(--shadow-elevation-2xl, 0 24px 48px rgba(0, 0, 0, 0.24)),
+);
+
+// Hover elevation (enhanced)
+$elevations-hover: (
+  "flat": var(--shadow-elevation-hover-none, 0 0 0 transparent),
+  "sm": var(--shadow-elevation-hover-sm, 0 4px 8px rgba(0, 0, 0, 0.12)),
+  "md": var(--shadow-elevation-hover-md, 0 8px 16px rgba(0, 0, 0, 0.16)),
+  "lg": var(--shadow-elevation-hover-lg, 0 12px 24px rgba(0, 0, 0, 0.2)),
+  "xl": var(--shadow-elevation-hover-xl, 0 20px 40px rgba(0, 0, 0, 0.24)),
+  "2xl": var(--shadow-elevation-hover-2xl, 0 32px 64px rgba(0, 0, 0, 0.28)),
+);
+
+// Glow spreads
+$glows: (
+  "subtle": (
+    0 0 8px,
+  ),
+  "medium": (
+    0 0 12px,
+  ),
+  "strong": (
+    0 0 16px,
+  ),
+  "intense": (
+    0 0 24px,
+  ),
+);
+
+// Border opacity presets
+$border-opacities: (
+  "none": 0,
+  "subtle": 0.1,
+  "default": 0.2,
+  "emphasis": 0.3,
+  "strong": 0.5,
+);
+
+// Radius presets (from design tokens)
+$radii: (
+  "xs": var(--radius-xs, 4px),
+  "sm": var(--radius-sm, 6px),
+  "md": var(--radius-md, 8px),
+  "lg": var(--radius-lg, 12px),
+  "xl": var(--radius-xl, 16px),
+  "2xl": var(--radius-2xl, 24px),
+  "full": var(--radius-full, 9999px),
+);
+
+/* ============================================================================
+   MAIN MIXIN: background()
+   ============================================================================
+   
+   Composable background styling with automatic state management.
+   
+   Parameters:
+   
+   $glass (string):
+   - "real-subtle", "real-medium", "real-heavy"     → High-quality blur
+   - "faux-light", "faux-dark", "faux-colorized"    → GPU-efficient gradients
+   - "none"                                          → Solid background
+   
+   $elevation (string):
+   - "flat", "sm", "md", "lg", "xl", "2xl"          → Box-shadow depth
+   
+   $glow (string):
+   - "none"                                          → No colored glow
+   - "subtle", "medium", "strong", "intense"        → Generic glow
+   - "semantic"                                      → Use $semantic color
+   - "seed"                                          → Use data-seed-mod color
+   
+   $border (string):
+   - "none", "subtle", "default", "emphasis", "strong"
+   
+   $radius (string):
+   - "xs", "sm", "md", "lg", "xl", "2xl", "full"
+   
+   $states (boolean):
+   - true  → Auto-generate :hover/:focus/:active
+   - false → Static styling only
+   
+   $hover-lift (boolean):
+   - true  → translateY(-4px) on hover
+   - false → scale(1.02) on hover
+   
+   $semantic (string):
+   - "healthy", "warning", "danger", "success", etc.
+   - Automatically colorizes border, glow, focus
+   
+   $seed (boolean):
+   - true  → Use data-seed-mod for colorization
+   - false → No seed colorization
+   
+   ============================================================================ */
+
+@mixin background(
+  $glass: "faux-light",
+  $elevation: "sm",
+  $glow: "none",
+  $border: "default",
+  $radius: "lg",
+  $states: true,
+  $hover-lift: false,
+  $semantic: null,
+  $seed: false
+) {
+  /* === 1. GLASS/BLUR BASE === */
+
+  @if string.index($glass, "real-") {
+    // Extract intensity: "real-medium" → "medium"
+    $intensity: string.slice($glass, 6);
+    @include glass.glass-real($intensity, "light", 1, 0);
+  } @else if string.index($glass, "faux-") {
+    // Extract tint: "faux-light" → "light"
+    $tint: string.slice($glass, 6);
+
+    @if $tint == "light" {
+      @include glass.glass-faux("light", "medium", false);
+    } @else if $tint == "dark" {
+      @include glass.glass-faux("dark", "medium", false);
+    } @else if $tint == "colorized" {
+      @include glass.glass-faux("colorized", "medium", false);
+    }
+  } @else if $glass == "none" {
+    // Solid background - use semantic/seed if provided
+    @if $semantic {
+      background: tokens.opacity(tokens.get-semantic-color($semantic), 0.1);
+    } @else if $seed {
+      background: var(--seed-color-alpha-subtle, rgba(59, 130, 246, 0.1));
+    } @else {
+      background: var(--color-bg-primary, rgba(255, 255, 255, 0.05));
+    }
+  }
+
+  /* === 2. BORDER RADIUS === */
+
+  border-radius: map.get($radii, $radius);
+
+  /* === 3. BORDER === */
+
+  @if $border != "none" {
+    $border-opacity: map.get($border-opacities, $border);
+    border: 1px solid rgba(255, 255, 255, $border-opacity);
+
+    // Emphasis borders are 2px
+    @if $border == "emphasis" or $border == "strong" {
+      border-width: 2px;
+    }
+
+    // Colorize border if semantic/seed
+    @if $semantic {
+      $color: tokens.get-semantic-color($semantic);
+      border-color: tokens.opacity(
+        $color,
+        $border-opacity * 1.5
+      ); // Slightly more opaque
+    } @else if $seed {
+      border-color: var(--seed-color-alpha, currentColor);
+    }
+  }
+
+  /* === 4. ELEVATION SHADOW === */
+
+  $shadow: map.get($elevations, $elevation);
+  box-shadow: $shadow;
+
+  /* === 5. GLOW (Optional colored shadow) === */
+
+  @if $glow != "none" {
+    $glow-spread: null;
+    $glow-color: rgba(255, 255, 255, 0.3);
+
+    // Get glow spread
+    @if $glow == "semantic" or $glow == "seed" {
+      $glow-spread: map.get($glows, "medium");
+    } @else {
+      $glow-spread: map.get($glows, $glow);
+    }
+
+    // Get glow color
+    @if $glow == "semantic" and $semantic {
+      $color: tokens.get-semantic-color($semantic);
+      $glow-color: tokens.opacity($color, 0.4);
+    } @else if $glow == "seed" and $seed {
+      $glow-color: var(--seed-color-alpha, currentColor);
+    }
+
+    // Combine elevation + glow
+    box-shadow:
+      $shadow,
+      $glow-spread $glow-color;
+  }
+
+  /* === 6. STATE MANAGEMENT === */
+
+  @if $states {
+    transition:
+      transform 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      box-shadow 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      border-color 200ms ease,
+      background 200ms ease;
+
+    cursor: pointer;
+    will-change: transform;
+
+    /* === HOVER STATE === */
+    &:hover {
+      @if $hover-lift {
+        transform: translateY(-4px);
+      } @else {
+        transform: scale(1.02);
+      }
+
+      // Enhanced shadow
+      $shadow-hover: map.get($elevations-hover, $elevation);
+      box-shadow: $shadow-hover;
+
+      // Enhanced glow on hover
+      @if $glow == "semantic" and $semantic {
+        $color: tokens.get-semantic-color($semantic);
+        $glow-spread: map.get($glows, "strong");
+        box-shadow:
+          $shadow-hover,
+          $glow-spread #{tokens.opacity($color, 0.5)};
+      } @else if $glow == "seed" and $seed {
+        $glow-spread: map.get($glows, "strong");
+        box-shadow:
+          $shadow-hover,
+          $glow-spread var(--seed-color-alpha);
+      } @else if $glow != "none" {
+        $glow-spread: map.get($glows, $glow);
+        box-shadow:
+          $shadow-hover,
+          $glow-spread rgba(255, 255, 255, 0.4);
+      }
+
+      // Slightly enhance border opacity
+      @if $border != "none" {
+        $border-opacity: map.get($border-opacities, $border);
+        @if $semantic {
+          $color: tokens.get-semantic-color($semantic);
+          border-color: tokens.opacity($color, $border-opacity * 2);
+        } @else if $seed {
+          border-color: var(--seed-color);
+        } @else {
+          border-color: rgba(255, 255, 255, $border-opacity * 1.5);
+        }
+      }
+    }
+
+    /* === ACTIVE/PRESSED STATE === */
+    &:active {
+      transform: scale(0.98);
+      box-shadow: $shadow; // Return to base shadow
+      transition-duration: 100ms; // Instant feedback
+    }
+
+    /* === FOCUS STATE (Accessibility) === */
+    &:focus-visible {
+      outline: none;
+
+      @if $semantic {
+        $color: tokens.get-semantic-color($semantic);
+        border-color: $color;
+        box-shadow: var(--focus-ring);
+      } @else if $seed {
+        border-color: var(--seed-color);
+        box-shadow:
+          $shadow,
+          0 0 0 3px var(--seed-color-alpha-subtle);
+      } @else {
+        border-color: var(--if-primary, #3b82f6);
+        box-shadow:
+          $shadow, var(--focus-ring, 0 0 0 3px rgba(59, 130, 246, 0.15));
+      }
+    }
+
+    /* === REDUCED MOTION SUPPORT === */
+    @media (prefers-reduced-motion: reduce) {
+      transition-duration: 100ms;
+
+      &:hover,
+      &:active {
+        transform: none;
+      }
+    }
+  }
+}
+
+/* ============================================================================
+   PRESET HELPERS - Common combinations
+   ============================================================================ */
+
+// Card presets
+@mixin background-card-default {
+  @include background(
+    $glass: "faux-light",
+    $elevation: "sm",
+    $border: "subtle",
+    $radius: "lg",
+    $states: true
+  );
+}
+
+@mixin background-card-elevated {
+  @include background(
+    $glass: "faux-light",
+    $elevation: "lg",
+    $glow: "subtle",
+    $border: "default",
+    $radius: "xl",
+    $states: true,
+    $hover-lift: true
+  );
+}
+
+@mixin background-card-semantic($status: "healthy") {
+  @include background(
+    $glass: "none",
+    $elevation: "sm",
+    $glow: "semantic",
+    $border: "emphasis",
+    $radius: "md",
+    $states: true,
+    $semantic: $status
+  );
+}
+
+@mixin background-card-seed {
+  @include background(
+    $glass: "faux-dark",
+    $elevation: "md",
+    $glow: "seed",
+    $border: "default",
+    $radius: "lg",
+    $states: true,
+    $hover-lift: true,
+    $seed: true
+  );
+}
+
+// Hero/modal presets
+@mixin background-hero {
+  @include background(
+    $glass: "real-heavy",
+    $elevation: "2xl",
+    $glow: "strong",
+    $border: "subtle",
+    $radius: "2xl",
+    $states: false
+  );
+}
+
+@mixin background-modal {
+  @include background(
+    $glass: "real-medium",
+    $elevation: "xl",
+    $border: "default",
+    $radius: "xl",
+    $states: false
+  );
+}
+
+// Button-style presets
+@mixin background-button-primary {
+  @include background(
+    $glass: "none",
+    $elevation: "sm",
+    $glow: "subtle",
+    $border: "none",
+    $radius: "md",
+    $states: true,
+    $semantic: "active"
+  );
+}
+
+@mixin background-button-ghost {
+  @include background(
+    $glass: "none",
+    $elevation: "flat",
+    $border: "subtle",
+    $radius: "md",
+    $states: true
+  );
+}
+
+/* ============================================================================
+   ADVANCED PATTERNS - Ticker, Edge Fading, Performance Comparison
+   ============================================================================ */
+
+// Ticker pattern with horizontal mask fade
+@mixin background-ticker(
+  $glass: "faux-light",
+  $elevation: "sm",
+  $fade-distance: 80px
+) {
+  @include background($glass, $elevation, none, "default", "lg", false);
+
+  // Apply horizontal mask fade for smooth edges
+  @include glass.glass-mask-fade("horizontal", $fade-distance);
+
+  // Horizontal scroll setup
+  overflow-x: auto;
+  overflow-y: hidden;
+  /* stylelint-disable-next-line property-no-unsupported-browser-features, plugin/no-unsupported-browser-features */
+  scrollbar-width: none; // Firefox
+
+  &::-webkit-scrollbar {
+    display: none; // Chrome, Safari, Edge
+  }
+}
+
+// Edge fade wrapper for overflow hints
+@mixin background-edge-fade(
+  $direction: "top",
+  $fade-distance: 60px,
+  $glass: "faux-light",
+  $elevation: "sm"
+) {
+  @include background($glass, $elevation, none, "default", "lg", false);
+  @include glass.glass-mask-fade($direction, $fade-distance);
+}
+
+// Performance comparison preset (real vs faux blur)
+@mixin background-perf-compare($mode: "faux") {
+  @if $mode == "real" {
+    @include background("real-medium", "md", "subtle", "default", "lg", true);
+  } @else {
+    @include background("faux-light", "md", "subtle", "default", "lg", true);
+  }
+}

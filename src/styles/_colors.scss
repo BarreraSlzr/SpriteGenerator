@@ -1,0 +1,222 @@
+/**
+ * InternetFriends Color System
+ * Centralized color tokens with semantic naming and branch-specific colors
+ * Used across components for consistency
+ * 
+ * ## Usage Examples:
+ * 
+ * ### Data Attributes (Preferred - GPU Accelerated):
+ * ```tsx
+ * <div data-branch-type="main">Main branch</div>
+ * <span data-branch-type="feature">Feature</span>
+ * <kbd data-seed="3">Unknown branch</kbd>
+ * ```
+ * 
+ * ### SCSS Mixins:
+ * ```scss
+ * .myComponent {
+ *   @include git-branch-color(background-color);
+ *   @include git-seed-color(color);
+ *   @include glass-card(16px, 0.9);
+ *   @include kbd-badge(0.15);
+ * }
+ * ```
+ * 
+ * ### CSS Variables (Runtime):
+ * ```css
+ * .dynamic {
+ *   color: var(--git-main);
+ *   border-color: var(--git-feature);
+ * }
+ * ```
+ * 
+ * ## Deterministic Seed Colors:
+ * Unknown branches get consistent colors based on hash(branchName) % 6
+ * This ensures same branch always gets same color without JS calculation
+ * 
+ * ## Performance:
+ * - Data attributes leverage CSS engine (GPU accelerated)
+ * - Eliminates inline styles and dynamic class generation
+ * - Reduces JS bundle size and runtime calculations
+ * - Better for large graphs with many commits
+ */
+
+/* ============================================
+   Git ANSI Terminal Colors
+   Native colors from git log --color=always
+   ============================================ */
+
+$git-ansi-green: #2ea043;    // main/master branches
+$git-ansi-yellow: #d29922;   // feature branches
+$git-ansi-magenta: #bc4c9f;  // release branches
+$git-ansi-cyan: #0969da;     // develop/hotfix
+$git-ansi-red: #cf222e;      // tags/conflicts
+$git-ansi-blue: #0550ae;     // secondary branches
+
+/* ============================================
+   Git Branch Colors - Deterministic Palette
+   ============================================ */
+
+// Primary branch colors
+$git-main: #3b82f6;       // Blue - main/master branches
+$git-develop: #f59e0b;    // Amber - develop branch
+$git-epic: #06b6d4;       // Cyan - epic branches
+$git-feature: #8b5cf6;    // Purple - feature branches
+$git-hotfix: #ef4444;     // Red - hotfix branches
+$git-release: #10b981;    // Emerald - release branches
+$git-merge: #22c55e;      // Green - merge indicators
+
+// Seed-based deterministic colors for unknown branches
+$git-seed-colors: (
+  0: #10b981,  // emerald
+  1: #f59e0b,  // amber
+  2: #8b5cf6,  // purple
+  3: #ec4899,  // pink
+  4: #06b6d4,  // cyan
+  5: #f97316,  // orange
+);
+
+/* ============================================
+   Component State Colors
+   ============================================ */
+
+$state-active: #3b82f6;
+$state-hover: #2563eb;
+$state-focus: #1d4ed8;
+$state-disabled: #9ca3af;
+$state-error: #ef4444;
+$state-warning: #f59e0b;
+$state-success: #10b981;
+$state-info: #06b6d4;
+
+/* ============================================
+   Glass Morphism Colors
+   ============================================ */
+
+$glass-bg-primary: rgba(255, 255, 255, 0.85);
+$glass-bg-secondary: rgba(255, 255, 255, 0.65);
+$glass-bg-tertiary: rgba(255, 255, 255, 0.45);
+$glass-border-primary: rgba(255, 255, 255, 0.5);
+$glass-border-secondary: rgba(255, 255, 255, 0.3);
+
+/* ============================================
+   Semantic Colors
+   ============================================ */
+
+$semantic-primary: #3b82f6;
+$semantic-secondary: #8b5cf6;
+$semantic-accent: #06b6d4;
+$semantic-muted: #6b7280;
+$semantic-destructive: #ef4444;
+
+/* ============================================
+   SCSS Mixins for Git Branch Colors
+   ============================================ */
+
+// Apply branch color using data attribute
+@mixin git-branch-color($property: 'color') {
+  &[data-branch-type="main"],
+  &[data-branch-type="master"] {
+    #{$property}: $git-main;
+  }
+  
+  &[data-branch-type="develop"] {
+    #{$property}: $git-develop;
+  }
+  
+  &[data-branch-type="epic"] {
+    #{$property}: $git-epic;
+  }
+  
+  &[data-branch-type="feature"] {
+    #{$property}: $git-feature;
+  }
+  
+  &[data-branch-type="hotfix"] {
+    #{$property}: $git-hotfix;
+  }
+  
+  &[data-branch-type="release"] {
+    #{$property}: $git-release;
+  }
+  
+  &[data-branch-type="merge"] {
+    #{$property}: $git-merge;
+  }
+}
+
+// Deterministic seed-based color using CSS custom properties
+@mixin git-seed-color($property: 'color') {
+  @each $seed, $color in $git-seed-colors {
+    &[data-seed="#{$seed}"] {
+      #{$property}: $color;
+    }
+  }
+}
+
+// Glass card preset
+@mixin glass-card($blur: 12px, $opacity: 0.85) {
+  background: hsl(var(--background) / #{$opacity});
+  -webkit-backdrop-filter: blur(#{$blur});
+  backdrop-filter: blur(#{$blur});
+  border: 1px solid hsl(var(--border) / 0.5);
+  border-radius: var(--radius-lg);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: var(--transition-layout-smooth);
+  
+  &:hover {
+    border-color: hsl(var(--border) / 0.8);
+    box-shadow: 
+      0 12px 48px rgba(0, 0, 0, 0.15),
+      0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// KBD badge preset (from mermaid viewer)
+@mixin kbd-badge($bg-opacity: 0.1) {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px 6px;
+  font-family: ui-monospace, 'SF Mono', Monaco, 'Cascadia Code', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  border: 1px solid currentColor;
+  background: currentColor;
+  background-clip: padding-box;
+  -webkit-background-clip: padding-box;
+  opacity: #{$bg-opacity + 0.9};
+  transition: all 0.2s ease;
+  
+  &:hover {
+    opacity: 1;
+    transform: translateY(-1px);
+  }
+}
+
+// Export colors as CSS custom properties for runtime access
+@mixin git-color-variables {
+  --git-main: #{$git-main};
+  --git-develop: #{$git-develop};
+  --git-epic: #{$git-epic};
+  --git-feature: #{$git-feature};
+  --git-hotfix: #{$git-hotfix};
+  --git-release: #{$git-release};
+  --git-merge: #{$git-merge};
+  
+  // ANSI terminal colors
+  --git-ansi-green: #{$git-ansi-green};
+  --git-ansi-yellow: #{$git-ansi-yellow};
+  --git-ansi-magenta: #{$git-ansi-magenta};
+  --git-ansi-cyan: #{$git-ansi-cyan};
+  --git-ansi-red: #{$git-ansi-red};
+  --git-ansi-blue: #{$git-ansi-blue};
+  
+  --state-active: #{$state-active};
+  --state-hover: #{$state-hover};
+  --state-success: #{$state-success};
+  --state-error: #{$state-error};
+}

@@ -1,0 +1,216 @@
+/* ============================================================================
+   INTERNETFRIENDS SEMANTIC COLOR TOKENS
+   ============================================================================
+   
+   Single source of truth for all semantic colors across the application.
+   Supports light/dark themes and provides opacity variants.
+   
+   Philosophy:
+   - Semantic names (healthy, warning) > Implementation (green, red)
+   - HSL format for easy manipulation (lightness, saturation, alpha)
+   - CSS custom properties for runtime theme switching
+   - Modulo-based seed selection for deterministic color assignment
+   
+   Usage:
+   @use "tokens-semantic" as tokens;
+   color: tokens.$color-healthy;
+   background: tokens.opacity($color-healthy, 0.1);
+   ============================================================================ */
+
+@use "sass:map";
+@use "sass:color";
+
+/* ============================================================================
+   BASE SEMANTIC COLORS - Primary Palette
+   ============================================================================ */
+
+// Status colors (health indicators, build states, alerts)
+$color-healthy: #22c55e !default; // green-500
+$color-building: #f59e0b !default; // amber-500
+$color-warning: #ef4444 !default; // red-500
+$color-danger: #dc2626 !default; // red-600
+$color-error: #dc2626 !default; // alias for danger (backward compatibility)
+$color-success: #10b981 !default; // emerald-500
+
+// Interactive states (hover, active, focus)
+$color-active: #a855f7 !default; // purple-500
+$color-focus: #3b82f6 !default; // blue-500
+$color-disabled: #9ca3af !default; // gray-400
+
+// Informational colors
+$color-info: #3b82f6 !default; // blue-500
+$color-muted: #6b7280 !default; // gray-500
+$color-accent: #f97316 !default; // orange-500
+
+// Brand colors (maps to InternetFriends primary)
+$color-primary: var(--if-primary) !default;
+$color-secondary: #8b5cf6 !default; // violet-500
+
+/* ============================================================================
+   SEED-BASED COLOR PALETTE - Deterministic Modulo Selection
+   ============================================================================
+   
+   Use data-seed attribute with modulo calculation for infinite variations:
+   - Deterministic: same seed = same color
+   - Consistent: colors remain stable across sessions
+   - Scalable: works for any number of items
+   
+   Example:
+   <div data-seed="42">Item 42</div>   // Gets color based on 42 % 12
+   <div data-seed="abc">Item abc</div> // Hash "abc" then modulo
+   ============================================================================ */
+
+$seed-colors: (
+  0: #ef4444,
+  // red-500
+  1: #f97316,
+  // orange-500
+  2: #f59e0b,
+  // amber-500
+  3: #eab308,
+  // yellow-500
+  4: #84cc16,
+  // lime-500
+  5: #22c55e,
+  // green-500
+  6: #10b981,
+  // emerald-500
+  7: #14b8a6,
+  // teal-500
+  8: #06b6d4,
+  // cyan-500
+  9: #3b82f6,
+  // blue-500
+  10: #6366f1,
+  // indigo-500
+  11: #8b5cf6,
+  // violet-500
+  12: #a855f7,
+  // purple-500
+  13: #d946ef,
+  // fuchsia-500
+  14: #ec4899,
+  // pink-500
+  15: #f43f5e, // rose-500
+) !default;
+
+/* ============================================================================
+   HSL COLOR MAPS - For CSS Custom Property Generation
+   ============================================================================ */
+
+// Convert to HSL for better manipulation
+$hsl-healthy: 142, 71%, 45%;
+$hsl-building: 38, 92%, 50%;
+$hsl-warning: 4, 90%, 58%;
+$hsl-danger: 0, 84%, 60%;
+$hsl-success: 160, 84%, 39%;
+$hsl-active: 271, 91%, 65%;
+$hsl-focus: 217, 91%, 60%;
+$hsl-info: 217, 91%, 60%;
+$hsl-muted: 220, 9%, 46%;
+$hsl-accent: 25, 95%, 53%;
+
+/* ============================================================================
+   HELPER FUNCTIONS & MIXINS
+   ============================================================================ */
+
+// Generate opacity variant of a color
+@function opacity($color, $alpha) {
+  @return color.change($color, $alpha: $alpha);
+}
+
+// Mixin to apply opacity variants for background/border
+@mixin opacity-variant($color, $bg-opacity: 0.1, $border-opacity: 0.2) {
+  background: opacity($color, $bg-opacity);
+  border-color: opacity($color, $border-opacity);
+}
+
+// Get seed color by modulo index
+@function seed-color($index) {
+  $mod-index: $index % 16; // 16 colors in palette
+  @return map.get($seed-colors, $mod-index);
+}
+
+/* ============================================================================
+   SEMANTIC STATE MIXIN - Apply color + variants
+   ============================================================================ */
+
+@mixin semantic-state(
+  $state-name,
+  $base-color,
+  $bg-opacity: 0.1,
+  $border-opacity: 0.2
+) {
+  &[data-status="#{$state-name}"],
+  &[data-state="#{$state-name}"] {
+    color: $base-color;
+    background: opacity($base-color, $bg-opacity);
+    border: 1px solid opacity($base-color, $border-opacity);
+  }
+}
+
+/* ============================================================================
+   SEED-BASED COLORIZATION MIXIN
+   ============================================================================
+   
+   Applies deterministic color based on data-seed attribute.
+   Uses modulo calculation: seed % 16 selects from 16-color palette.
+   
+   Usage:
+   .card {
+     @include seed-colorize();
+   }
+   
+   HTML:
+   <div class="card" data-seed="5">Card 5</div>  // Gets green
+   <div class="card" data-seed="13">Card 13</div> // Gets purple
+   ============================================================================ */
+
+@mixin seed-colorize($scope: "seed", $bg-opacity: 0.1, $border-opacity: 0.2) {
+  // Generate rules for each seed color (0-15)
+  @each $index, $color in $seed-colors {
+    &[data-seed-mod="#{$index}"] {
+      --#{$scope}-color: #{$color};
+      color: $color;
+      background: opacity($color, $bg-opacity);
+      border: 1px solid opacity($color, $border-opacity);
+    }
+  }
+}
+
+/* ============================================================================
+   EXPORT TOKEN MAP - For JavaScript Access
+   ============================================================================ */
+
+$semantic-colors: (
+  "healthy": $color-healthy,
+  "building": $color-building,
+  "warning": $color-warning,
+  "danger": $color-danger,
+  "success": $color-success,
+  "active": $color-active,
+  "focus": $color-focus,
+  "disabled": $color-disabled,
+  "info": $color-info,
+  "muted": $color-muted,
+  "accent": $color-accent,
+  "primary": $color-primary,
+  "secondary": $color-secondary,
+) !default;
+
+/* ============================================================================
+   HELPER FUNCTION - Get Semantic Color by Name
+   ============================================================================
+   
+   Retrieves color value from semantic map with fallback.
+   
+   Usage:
+   $status-color: get-semantic-color("healthy");
+   ============================================================================ */
+
+@function get-semantic-color($status) {
+  @if map.has-key($semantic-colors, $status) {
+    @return map.get($semantic-colors, $status);
+  }
+  @return $color-healthy; // Fallback to healthy
+}

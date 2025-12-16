@@ -1,0 +1,42 @@
+@mixin layout-shell(
+  $max-width: var(--layout-max-content-width, var(--container-width, 1200px))
+) {
+  width: min(100%, #{$max-width});
+  margin-inline: auto;
+  padding-inline: var(
+    --layout-shell-edge-gap,
+    var(--layout-page-gutter, var(--space-container-padding-md))
+  );
+}
+
+@mixin hero-shell(
+  $min-height: 93vh,
+  $padding-block: 6vh,
+  $padding-inline: 4vw,
+  $margin-block: var(--space-1)
+) {
+  position: relative;
+  width: auto;
+  min-height: $min-height;
+  padding: $padding-block $padding-inline;
+  margin-block: $margin-block;
+  margin-inline: 0;
+  overflow: hidden;
+  background: var(--glass-bg-header);
+  border: var(--layout-header-border, 3px) solid var(--glass-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-glass);
+  transition: all var(--duration-standard, 0.3s) var(--easing-standard, ease);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  @media (min-width: 640px) {
+    margin-inline: var(--space-4);
+  }
+
+  @media (min-width: 1024px) {
+    margin-inline: var(--space-8);
+  }
+}

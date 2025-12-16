@@ -1,0 +1,134 @@
+/**
+ * Contact Patterns - Shared Design System Mixins
+ * Provides consistent styling patterns for contact forms and sections
+ */
+
+@mixin contact-section-shell(
+  $max-width: 80rem,
+  $gap: var(--space-component-gap-lg),
+  $align: stretch
+) {
+  max-width: $max-width;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: $gap;
+  align-items: $align;
+  width: 100%;
+
+  @media (min-width: 768px) {
+    padding: 0 var(--space-6);
+  }
+}
+
+@mixin contact-sticky-stack(
+  $top: 17vh,
+  $gap: var(--space-6),
+  $text-align: center,
+  $z-index: 0,
+  $align: center
+) {
+  position: sticky;
+  top: $top;
+  z-index: $z-index;
+  display: flex;
+  flex-direction: column;
+  align-items: $align;
+  justify-content: center;
+  gap: $gap;
+  text-align: $text-align;
+  transition:
+    opacity var(--duration-standard) var(--easing-standard),
+    transform var(--duration-standard) var(--easing-standard);
+}
+
+@mixin contact-glass-panel(
+  $background: var(--color-bg-glass),
+  $padding: var(--space-5),
+  $radius: var(--radius-lg),
+  $border-color: var(--glass-border),
+  $border-width: 1px,
+  $blur-filter: blur(12px),
+  $shadow: null
+) {
+  background: $background;
+  border: #{$border-width} solid $border-color;
+  border-radius: $radius;
+  padding: $padding;
+  backdrop-filter: $blur-filter;
+  -webkit-backdrop-filter: $blur-filter;
+  transition: all var(--duration-standard) var(--easing-standard);
+
+  @if $shadow != null {
+    box-shadow: $shadow;
+  }
+
+  &:hover,
+  &:focus-within {
+    border-color: var(--glass-border-hover, $border-color);
+  }
+}
+
+@mixin contact-body-copy(
+  $font-size: var(--font-size-base),
+  $color: var(--color-text-secondary),
+  $line-height: 1.6,
+  $max-width: 42rem,
+  $text-align: center,
+  $margin: 0
+) {
+  font-size: $font-size;
+  line-height: $line-height;
+  color: $color;
+  max-width: $max-width;
+  margin: $margin;
+
+  @if $text-align != inherit {
+    text-align: $text-align;
+  }
+}
+
+@mixin contact-field-stack($gap: var(--space-2)) {
+  display: flex;
+  flex-direction: column;
+  gap: $gap;
+}
+
+@mixin contact-field-label(
+  $font-size: 0.9rem,
+  $font-weight: 600,
+  $color: var(--color-text-primary)
+) {
+  font-size: $font-size;
+  font-weight: $font-weight;
+  color: $color;
+  margin-bottom: 0;
+}
+
+@mixin contact-status-message(
+  $padding: var(--space-2) var(--space-3),
+  $radius: var(--radius-md),
+  $font-size: 0.9rem
+) {
+  padding: $padding;
+  border-radius: $radius;
+  font-size: $font-size;
+  transition: all var(--duration-fast) var(--easing-standard);
+}
+
+@mixin contact-split-layout(
+  $mobile-columns: 1fr,
+  $desktop-columns: 1fr 1.2fr,
+  $gap: var(--space-8),
+  $breakpoint: 1024px
+) {
+  display: grid;
+  grid-template-columns: $mobile-columns;
+  gap: $gap;
+  align-items: start;
+
+  @media (min-width: $breakpoint) {
+    grid-template-columns: $desktop-columns;
+    gap: var(--space-12);
+  }
+}

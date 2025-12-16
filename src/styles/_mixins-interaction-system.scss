@@ -1,0 +1,524 @@
+/* ============================================================================
+   INTERACTION SYSTEM - O(1) Unified Gesture & State Composition
+   ============================================================================
+   
+   Consolidates 90+ scattered interaction patterns into composable mixins.
+   Combines transform, box-shadow, opacity, and filters with semantic/seed colors.
+   
+   COMPLEXITY: O(1) - Single mixin call generates all interaction states
+   
+   Identified Patterns:
+   - 50+ box-shadow instances (elevation, glow, focus rings)
+   - 40+ transform: scale instances (1.02-1.4× range)
+   - 30+ opacity transitions
+   - 20+ filter effects
+   
+   Benefits:
+   - DRY: One mixin replaces 10-20 lines
+   - KISS: Simple API, complex output
+   - SOLID: Single responsibility per interaction type
+   - Deterministic: Predictable behavior
+   - Performance: GPU-optimized transforms
+   
+   ============================================================================ */
+
+@use "tokens-semantic" as tokens;
+
+/* ============================================================================
+   PRESETS - Standardized Interaction Values
+   ============================================================================ */
+
+// Transform scales (from codebase analysis)
+$scale-micro: 1.02; // Subtle hover (brand, navigation)
+$scale-small: 1.05; // Standard cards
+$scale-medium: 1.1; // Emphasis
+$scale-large: 1.2; // Strong emphasis
+$scale-xl: 1.3; // Success states
+$scale-max: 1.4; // Maximum (priority badges)
+
+// Elevations (box-shadow depth)
+$elevation-flat: 0 0 0 transparent;
+$elevation-sm: 0 2px 4px rgba(0, 0, 0, 0.08);
+$elevation-md: 0 4px 8px rgba(0, 0, 0, 0.12);
+$elevation-lg: 0 8px 16px rgba(0, 0, 0, 0.16);
+$elevation-xl: 0 16px 32px rgba(0, 0, 0, 0.2);
+$elevation-2xl: 0 24px 48px rgba(0, 0, 0, 0.24);
+
+// Glow intensities (for semantic/seed colorization)
+$glow-subtle: 0 0 8px;
+$glow-medium: 0 0 12px;
+$glow-strong: 0 0 16px;
+$glow-intense: 0 0 24px;
+
+// Timing & easing
+$duration-instant: 100ms;
+$duration-fast: 150ms;
+$duration-normal: 200ms;
+$duration-slow: 300ms;
+$easing-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+$easing-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+$easing-sharp: cubic-bezier(0.4, 0, 0.2, 1);
+
+/* ============================================================================
+   MIXIN: interactive()
+   ============================================================================
+   
+   Unified interaction system combining all gesture states.
+   
+   Parameters:
+   - $scale: micro/small/medium/large/xl/max or custom number
+   - $elevation: flat/sm/md/lg/xl/2xl or custom shadow
+   - $duration: instant/fast/normal/slow or custom ms
+   - $easing: smooth/bounce/sharp or custom cubic-bezier
+   - $glow: none/subtle/medium/strong/intense (optional colorization)
+   - $opacity: Custom opacity on hover (default: none)
+   
+   Generates:
+   - :hover state with transform + elevation + glow
+   - :active state with pressed effect
+   - :focus-visible state with accessibility ring
+   - GPU-optimized will-change hints
+   - Reduced motion support
+   
+   Usage:
+   .card {
+     @include interactive("medium", "md", "normal", "smooth");
+   }
+   
+   .semanticButton {
+     @include interactive("small", "sm", "fast", "smooth", "medium");
+     @include state-variants("all"); // Colorizes glow
+   }
+   
+   ============================================================================ */
+
+@mixin interactive(
+  $scale: "small",
+  $elevation: "sm",
+  $duration: "normal",
+  $easing: "smooth",
+  $glow: "none",
+  $opacity: null
+) {
+  // Resolve scale value
+  $scale-value: 1.05; // default
+  @if $scale == "micro" {
+    $scale-value: $scale-micro;
+  } @else if $scale == "small" {
+    $scale-value: $scale-small;
+  } @else if $scale == "medium" {
+    $scale-value: $scale-medium;
+  } @else if $scale == "large" {
+    $scale-value: $scale-large;
+  } @else if $scale == "xl" {
+    $scale-value: $scale-xl;
+  } @else if $scale == "max" {
+    $scale-value: $scale-max;
+  } @else if type-of($scale) == "number" {
+    $scale-value: $scale;
+  }
+
+  // Resolve elevation shadow
+  $elevation-value: $elevation-sm; // default
+  @if $elevation == "flat" {
+    $elevation-value: $elevation-flat;
+  } @else if $elevation == "sm" {
+    $elevation-value: $elevation-sm;
+  } @else if $elevation == "md" {
+    $elevation-value: $elevation-md;
+  } @else if $elevation == "lg" {
+    $elevation-value: $elevation-lg;
+  } @else if $elevation == "xl" {
+    $elevation-value: $elevation-xl;
+  } @else if $elevation == "2xl" {
+    $elevation-value: $elevation-2xl;
+  } @else if type-of($elevation) == "string" and str-index($elevation, "0 ") {
+    $elevation-value: unquote($elevation);
+  }
+
+  // Resolve duration
+  $duration-value: $duration-normal; // default
+  @if $duration == "instant" {
+    $duration-value: $duration-instant;
+  } @else if $duration == "fast" {
+    $duration-value: $duration-fast;
+  } @else if $duration == "normal" {
+    $duration-value: $duration-normal;
+  } @else if $duration == "slow" {
+    $duration-value: $duration-slow;
+  } @else if type-of($duration) == "number" {
+    $duration-value: $duration;
+  }
+
+  // Resolve easing
+  $easing-value: $easing-smooth; // default
+  @if $easing == "smooth" {
+    $easing-value: $easing-smooth;
+  } @else if $easing == "bounce" {
+    $easing-value: $easing-bounce;
+  } @else if $easing == "sharp" {
+    $easing-value: $easing-sharp;
+  } @else if type-of($easing) == "string" and str-index($easing, "cubic-bezier")
+  {
+    $easing-value: unquote($easing);
+  }
+
+  // Resolve glow
+  $glow-spread: null;
+  @if $glow == "subtle" {
+    $glow-spread: $glow-subtle;
+  } @else if $glow == "medium" {
+    $glow-spread: $glow-medium;
+  } @else if $glow == "strong" {
+    $glow-spread: $glow-strong;
+  } @else if $glow == "intense" {
+    $glow-spread: $glow-intense;
+  }
+
+  // Base transition
+  transition:
+    transform $duration-value $easing-value,
+    box-shadow $duration-value $easing-value,
+    opacity $duration-value $easing-value,
+    filter $duration-value $easing-value;
+
+  // GPU optimization hint
+  will-change: transform;
+
+  // Cursor indicates interactivity
+  cursor: pointer;
+
+  // Hover state
+  &:hover {
+    transform: scale($scale-value);
+    box-shadow: $elevation-value;
+
+    @if $glow-spread != null {
+      // Glow effect uses CSS custom property for colorization
+      // Set via semantic-state or seed-colorization
+      box-shadow:
+        $elevation-value,
+        $glow-spread var(--interaction-glow-color, currentColor);
+    }
+
+    @if $opacity != null {
+      opacity: $opacity;
+    }
+  }
+
+  // Active/pressed state (85% of hover scale for tactile feedback)
+  &:active {
+    transform: scale($scale-value * 0.85);
+    transition-duration: $duration-instant; // Immediate feedback
+  }
+
+  // Focus ring (accessibility)
+  &:focus-visible {
+    outline: 2px solid var(--interaction-focus-color);
+    outline-offset: 2px;
+    box-shadow: var(--focus-ring);
+  }
+
+  // Reduced motion support
+  @media (prefers-reduced-motion: reduce) {
+    transition-duration: $duration-instant;
+
+    &:hover {
+      transform: none; // No scale for reduced motion users
+    }
+
+    &:active {
+      transform: none;
+    }
+  }
+}
+
+/* ============================================================================
+   MIXIN: interactive-semantic()
+   ============================================================================
+   
+   Combines interactive() with semantic state colorization.
+   Automatically applies glow/focus colors from semantic tokens.
+   
+   Parameters:
+   - $status: healthy/building/warning/danger/success/active/info/muted
+   - $scale, $elevation, $duration, $easing: same as interactive()
+   
+   Usage:
+   .healthyCard {
+     @include interactive-semantic("healthy", "medium", "md");
+   }
+   
+   .warningButton {
+     @include interactive-semantic("warning", "small", "sm", "fast");
+   }
+   
+   ============================================================================ */
+
+@mixin interactive-semantic(
+  $status: "healthy",
+  $scale: "small",
+  $elevation: "sm",
+  $duration: "normal",
+  $easing: "smooth"
+) {
+  // Get semantic color
+  $color: tokens.$color-healthy; // default
+  @if $status == "healthy" {
+    $color: tokens.$color-healthy;
+  } @else if $status == "building" {
+    $color: tokens.$color-building;
+  } @else if $status == "warning" {
+    $color: tokens.$color-warning;
+  } @else if $status == "danger" {
+    $color: tokens.$color-danger;
+  } @else if $status == "success" {
+    $color: tokens.$color-success;
+  } @else if $status == "active" {
+    $color: tokens.$color-active;
+  } @else if $status == "info" {
+    $color: tokens.$color-info;
+  } @else if $status == "muted" {
+    $color: tokens.$color-muted;
+  }
+
+  // Set color variables for glow/focus
+  --interaction-glow-color: #{tokens.opacity($color, 0.4)};
+  --interaction-focus-color: #{$color};
+  --interaction-focus-ring: #{tokens.opacity($color, 0.1)};
+
+  // Apply base interactive behavior
+  @include interactive($scale, $elevation, $duration, $easing, "medium");
+}
+
+/* ============================================================================
+   MIXIN: interactive-seed()
+   ============================================================================
+   
+   Combines interactive() with seed-based deterministic colorization.
+   Applies glow/focus colors from 16-color seed palette.
+   
+   Parameters:
+   - $scale, $elevation, $duration, $easing: same as interactive()
+   
+   Usage:
+   .projectCard {
+     @include interactive-seed("medium", "md");
+   }
+   
+   HTML:
+   <div class="projectCard" data-seed-mod="7">...</div>
+   
+   ============================================================================ */
+
+@mixin interactive-seed(
+  $scale: "small",
+  $elevation: "sm",
+  $duration: "normal",
+  $easing: "smooth"
+) {
+  // Seed colorization generates --seed-color custom property
+  // Use it for glow/focus (set via data-seed-mod attribute)
+  --interaction-glow-color: var(--seed-color-alpha, currentColor);
+  --interaction-focus-color: var(--seed-color, currentColor);
+  --interaction-focus-ring: var(
+    --seed-color-alpha-subtle,
+    rgba(59, 130, 246, 0.1)
+  );
+
+  // Apply base interactive behavior
+  @include interactive($scale, $elevation, $duration, $easing, "medium");
+}
+
+/* ============================================================================
+   MIXIN: interactive-lift()
+   ============================================================================
+   
+   Vertical lift effect (translateY) instead of scale.
+   Common pattern: logo hover, floating buttons, cards.
+   
+   Parameters:
+   - $distance: Distance to lift (default: -4px)
+   - $elevation, $duration, $easing: same as interactive()
+   
+   Usage:
+   .logo {
+     @include interactive-lift(-2px, "sm", "fast");
+   }
+   
+   .floatingButton {
+     @include interactive-lift(-8px, "lg", "normal", "bounce");
+   }
+   
+   ============================================================================ */
+
+@mixin interactive-lift(
+  $distance: -4px,
+  $elevation: "md",
+  $duration: "normal",
+  $easing: "smooth"
+) {
+  // Resolve elevation
+  $elevation-value: $elevation-md;
+  @if $elevation == "flat" {
+    $elevation-value: $elevation-flat;
+  } @else if $elevation == "sm" {
+    $elevation-value: $elevation-sm;
+  } @else if $elevation == "md" {
+    $elevation-value: $elevation-md;
+  } @else if $elevation == "lg" {
+    $elevation-value: $elevation-lg;
+  } @else if $elevation == "xl" {
+    $elevation-value: $elevation-xl;
+  } @else if $elevation == "2xl" {
+    $elevation-value: $elevation-2xl;
+  }
+
+  // Resolve duration
+  $duration-value: $duration-normal;
+  @if $duration == "instant" {
+    $duration-value: $duration-instant;
+  } @else if $duration == "fast" {
+    $duration-value: $duration-fast;
+  } @else if $duration == "normal" {
+    $duration-value: $duration-normal;
+  } @else if $duration == "slow" {
+    $duration-value: $duration-slow;
+  }
+
+  // Resolve easing
+  $easing-value: $easing-smooth;
+  @if $easing == "smooth" {
+    $easing-value: $easing-smooth;
+  } @else if $easing == "bounce" {
+    $easing-value: $easing-bounce;
+  } @else if $easing == "sharp" {
+    $easing-value: $easing-sharp;
+  }
+
+  transition:
+    transform $duration-value $easing-value,
+    box-shadow $duration-value $easing-value;
+
+  will-change: transform;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY($distance);
+    box-shadow: $elevation-value;
+  }
+
+  &:active {
+    transform: translateY($distance * 0.5); // Half-lift when pressed
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &:hover,
+    &:active {
+      transform: none;
+    }
+  }
+}
+
+/* ==========================================================================
+   MIXIN: priority-badge
+   ==========================================================================
+   Consolidates repeated badge styling for priority variants (high/medium/low).
+   Use: @include priority-badge('high');
+   This avoids repeating box-shadow and background declarations across scope.
+   ==========================================================================*/
+@mixin priority-badge($level: "high") {
+  @if $level == "high" {
+    background: var(--priority-high-bg-badge);
+    box-shadow: 0 0 4px var(--priority-high-shadow-glow);
+    border: 1px solid var(--priority-high-shadow-glow);
+  } @else if $level == "medium" {
+    background: var(--priority-medium-bg-badge);
+    box-shadow: 0 0 4px var(--priority-medium-shadow-glow);
+    border: 1px solid var(--priority-medium-shadow-glow);
+  } @else if $level == "low" {
+    background: var(--priority-low-bg-badge);
+    box-shadow: 0 0 4px var(--priority-low-shadow-glow);
+    border: 1px solid var(--priority-low-shadow-glow);
+  }
+}
+
+/* ==========================================================================
+   MIXIN: priority-shadow
+   Applies priority-based box-shadow and optional inset shadow for a given level.
+   Usage: @include priority-shadow('high', 'strong', true);
+========================================================================== */
+@mixin priority-shadow($level: "high", $strength: "strong", $inset: false) {
+  $var: "--priority-#{$level}-shadow-#{$strength}";
+  @if $inset {
+    box-shadow:
+      0 0 6px var(#{$var}),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  } @else {
+    box-shadow: 0 0 6px var(#{$var});
+  }
+}
+
+/* ==========================================================================
+   MIXIN: priority-selected
+   Applies selected-state glow and medium shadow for a given level.
+   Usage: @include priority-selected('high');
+========================================================================== */
+@mixin priority-selected($level: "high") {
+  box-shadow:
+    0 0 12px var(--priority-#{$level}-shadow-glow),
+    0 0 20px var(--priority-#{$level}-shadow-medium);
+}
+
+/* ============================================================================
+   HELPER: set-interaction-color()
+   ============================================================================
+   
+   Manually set interaction glow/focus colors.
+   Useful for custom color schemes outside semantic/seed systems.
+   
+   Parameters:
+   - $color: Any valid CSS color
+   - $glow-opacity: Opacity for glow effect (default: 0.4)
+   - $ring-opacity: Opacity for focus ring (default: 0.1)
+   
+   Usage:
+   .customCard {
+     @include set-interaction-color(#ff6b6b, 0.5, 0.15);
+     @include interactive("medium", "md");
+   }
+   
+   ============================================================================ */
+
+@mixin set-interaction-color($color, $glow-opacity: 0.4, $ring-opacity: 0.1) {
+  --interaction-glow-color: #{rgba($color, $glow-opacity)};
+  --interaction-focus-color: #{$color};
+  --interaction-focus-ring: #{rgba($color, $ring-opacity)};
+}
+
+/* ============================================================================
+   UTILITY CLASSES (Optional - for rapid prototyping)
+   ============================================================================ */
+
+.interactive-micro {
+  @include interactive("micro", "flat", "fast");
+}
+.interactive-small {
+  @include interactive("small", "sm");
+}
+.interactive-medium {
+  @include interactive("medium", "md");
+}
+.interactive-large {
+  @include interactive("large", "lg");
+}
+
+.interactive-lift {
+  @include interactive-lift();
+}
+.interactive-lift-sm {
+  @include interactive-lift(-2px, "sm");
+}
+.interactive-lift-lg {
+  @include interactive-lift(-8px, "lg");
+}

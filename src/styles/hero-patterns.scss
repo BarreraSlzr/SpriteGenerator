@@ -1,0 +1,99 @@
+@mixin hero-shadow-vars(
+  $title-shadow: 0 2px 8px rgba(15, 23, 42, 0.4),
+  $description-shadow: 0 1px 4px rgba(15, 23, 42, 0.7)
+) {
+  --hero-title-shadow: #{$title-shadow};
+  --hero-description-shadow: #{$description-shadow};
+}
+
+@mixin hero-stack(
+  $text-align: left,
+  $max-width: 72rem,
+  $padding-block: 26vh,
+  $gap: null
+) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: $text-align;
+  max-width: $max-width;
+  width: 100%;
+  min-height: 0;
+  padding-bottom: $padding-block;
+
+  @if $gap != null {
+    gap: $gap;
+  }
+
+  color: var(--color-text-primary);
+  transition: color var(--theme-transition-color);
+
+  [data-theme="dark"] & {
+    color: var(--color-text-inverse);
+  }
+}
+
+@mixin hero-heading(
+  $mobile-size: 2.5rem,
+  $tablet-size: 2.75rem,
+  $desktop-size: 3.5rem,
+  $font-weight: 800,
+  $letter-spacing: -0.03em,
+  $line-height: 1.1,
+  $text-align: inherit
+) {
+  font-size: $desktop-size;
+  font-weight: $font-weight;
+  letter-spacing: $letter-spacing;
+  line-height: $line-height;
+  text-shadow: var(--hero-title-shadow);
+
+  @if $text-align != inherit {
+    text-align: $text-align;
+  }
+
+  @media (max-width: 640px) {
+    font-size: $mobile-size;
+  }
+
+  @media (min-width: 641px) and (max-width: 900px) {
+    font-size: $tablet-size;
+  }
+}
+
+@mixin hero-description(
+  $font-size-desktop: var(--font-size-xl),
+  $font-size-tablet: 1.175rem,
+  $font-size-mobile: var(--font-size-lg),
+  $max-width-desktop: 48rem,
+  $max-width-tablet: 42rem,
+  $line-height: 1.7,
+  $text-align: inherit
+) {
+  font-size: $font-size-desktop;
+  line-height: $line-height;
+  max-width: $max-width-desktop;
+  font-family: var(
+    --font-geist-sans,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif
+  );
+  text-shadow: var(--hero-description-shadow);
+
+  @if $text-align != inherit {
+    text-align: $text-align;
+  }
+
+  @media (max-width: 640px) {
+    font-size: $font-size-mobile;
+    max-width: 100%;
+  }
+
+  @media (min-width: 641px) and (max-width: 900px) {
+    font-size: $font-size-tablet;
+    max-width: $max-width-tablet;
+  }
+}

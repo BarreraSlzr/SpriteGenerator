@@ -1,0 +1,348 @@
+@use "sass:map";
+// LEGEND: Semantic Color System Mixins
+// Reusable utilities for data-color attribute patterns
+// Reduces redundancy across button, badge, link, code, and other components
+
+@use "design-tokens" as *;
+@use "tokens-semantic" as semantic;
+
+// ============================================================
+// COLOR VARIANT GENERATOR MIXINS
+// ============================================================
+
+/**
+ * Generate data-color attributes for a CSS custom property
+ * 
+ * @param {string} $prop-name - CSS custom property name (e.g., "btn-color", "badge-color")
+ * 
+ * @example
+ *   .button {
+ *     @include semantic-color-variants("btn-color");
+ *     // Generates: &[data-color="primary"] { --btn-color: #3b82f6; }
+ *   }
+ */
+@mixin semantic-color-variants($prop-name) {
+  &[data-color="primary"] {
+    --#{$prop-name}: #{$color-primary};
+  }
+
+  &[data-color="success"] {
+    --#{$prop-name}: #{semantic.$color-success};
+  }
+
+  &[data-color="warning"] {
+    --#{$prop-name}: #{semantic.$color-warning};
+  }
+
+  &[data-color="error"] {
+    --#{$prop-name}: #{semantic.$color-error};
+  }
+}
+
+/**
+ * Generate data-color attributes with hover variants
+ * Useful for links, text, and elements that need distinct hover colors
+ * 
+ * @param {string} $base-prop - Base CSS custom property name
+ * @param {string} $hover-prop - Hover CSS custom property name
+ * 
+ * @example
+ *   .link {
+ *     @include semantic-color-variants-with-hover("link-color", "link-color-hover");
+ *   }
+ */
+@mixin semantic-color-variants-with-hover($base-prop, $hover-prop) {
+  &[data-color="primary"] {
+    --#{$base-prop}: #{$if-primary};
+    --#{$hover-prop}: #{$if-primary-hover};
+  }
+
+  &[data-color="success"] {
+    --#{$base-prop}: #{semantic.$color-success};
+    --#{$hover-prop}: color-mix(in srgb, #{semantic.$color-success} 80%, black);
+  }
+
+  &[data-color="warning"] {
+    --#{$base-prop}: #{semantic.$color-warning};
+    --#{$hover-prop}: color-mix(in srgb, #{semantic.$color-warning} 80%, black);
+  }
+
+  &[data-color="error"] {
+    --#{$base-prop}: #{semantic.$color-error};
+    --#{$hover-prop}: color-mix(in srgb, #{semantic.$color-error} 80%, black);
+  }
+}
+
+// ============================================================
+// SEMANTIC STYLING MIXINS (using CSS custom properties)
+// ============================================================
+
+/**
+ * Apply semantic button/badge styling using a CSS custom property
+ * Generates consistent background, border, and hover states
+ * 
+ * @param {string} $color-prop - CSS custom property name (default: "component-color")
+ * @param {map} $options - Configuration options:
+ *   - bg-opacity: Background opacity percentage (default: 12)
+ *   - border-opacity: Border opacity percentage (default: 30)
+ *   - hover-bg-opacity: Hover background opacity (default: 20)
+ *   - hover-border-opacity: Hover border opacity (default: 50)
+ * 
+ * @example
+ *   .badge[data-color] {
+ *     @include semantic-component-base("badge-color");
+ *   }
+ */
+@mixin semantic-component-base($color-prop: "component-color", $options: ()) {
+  // Default options
+  $bg-opacity: if(
+    map.get($options, bg-opacity),
+    map.get($options, bg-opacity),
+    12
+  );
+  $border-opacity: if(
+    map.get($options, border-opacity),
+    map.get($options, border-opacity),
+    30
+  );
+  $hover-bg-opacity: if(
+    map.get($options, hover-bg-opacity),
+    map.get($options, hover-bg-opacity),
+    20
+  );
+  $hover-border-opacity: if(
+    map.get($options, hover-border-opacity),
+    map.get($options, hover-border-opacity),
+    50
+  );
+
+  background: color-mix(
+    in srgb,
+    var(--#{$color-prop}) #{$bg-opacity + "%"},
+    transparent
+  );
+  border-color: color-mix(
+    in srgb,
+    var(--#{$color-prop}) #{$border-opacity + "%"},
+    transparent
+  );
+  color: var(--#{$color-prop});
+
+  &:hover {
+    background: color-mix(
+      in srgb,
+      var(--#{$color-prop}) #{$hover-bg-opacity + "%"},
+      transparent
+    );
+
+    @if $hover-border-opacity {
+      border-color: color-mix(
+        in srgb,
+        var(--#{$color-prop}) #{$hover-border-opacity + "%"},
+        transparent
+      );
+    }
+  }
+}
+
+/**
+ * Apply semantic button styling with full interactive states
+ * Includes hover, active, disabled, and box-shadow effects
+ * 
+ * @param {string} $color-prop - CSS custom property name
+ * @param {map} $options - Configuration options (same as semantic-component-base)
+ * 
+ * @example
+ *   .button[data-color] {
+ *     @include semantic-button-interactive("btn-color");
+ *   }
+ */
+@mixin semantic-button-interactive($color-prop: "btn-color", $options: ()) {
+  $bg-opacity: if(
+    map.get($options, bg-opacity),
+    map.get($options, bg-opacity),
+    12
+  );
+  $border-opacity: if(
+    map.get($options, border-opacity),
+    map.get($options, border-opacity),
+    30
+  );
+  $hover-bg-opacity: if(
+    map.get($options, hover-bg-opacity),
+    map.get($options, hover-bg-opacity),
+    20
+  );
+  $hover-border-opacity: if(
+    map.get($options, hover-border-opacity),
+    map.get($options, hover-border-opacity),
+    50
+  );
+  $active-bg-opacity: if(
+    map.get($options, active-bg-opacity),
+    map.get($options, active-bg-opacity),
+    25
+  );
+  $glow-opacity: if(
+    map.get($options, glow-opacity),
+    map.get($options, glow-opacity),
+    30
+  );
+
+  background: color-mix(
+    in srgb,
+    var(--#{$color-prop}) #{$bg-opacity + "%"},
+    transparent
+  );
+  border-color: color-mix(
+    in srgb,
+    var(--#{$color-prop}) #{$border-opacity + "%"},
+    transparent
+  );
+  color: var(--color-text-primary);
+
+  &:hover:not(:disabled):not(.disabled) {
+    background: color-mix(
+      in srgb,
+      var(--#{$color-prop}) #{$hover-bg-opacity + "%"},
+      transparent
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--#{$color-prop}) #{$hover-border-opacity + "%"},
+      transparent
+    );
+    box-shadow: 0 0 12px
+      color-mix(
+        in srgb,
+        var(--#{$color-prop}) #{$glow-opacity + "%"},
+        transparent
+      );
+  }
+
+  &:active:not(:disabled):not(.disabled) {
+    background: color-mix(
+      in srgb,
+      var(--#{$color-prop}) #{$active-bg-opacity + "%"},
+      transparent
+    );
+    transform: translateY(1px) scale(0.98);
+  }
+}
+
+// ============================================================
+// COMPLETE DATA-COLOR IMPLEMENTATION MIXIN
+// ============================================================
+
+/**
+ * Complete data-color implementation in one line
+ * Combines variant generation + styling application
+ * 
+ * @param {string} $color-prop - CSS custom property name
+ * @param {string} $style-type - "component" (badge/simple) or "button" (interactive)
+ * @param {map} $options - Style options (passed to styling mixin)
+ * 
+ * @example
+ *   .badge {
+ *     @include data-color-system("badge-color", "component");
+ *   }
+ * 
+ * @example
+ *   .button {
+ *     @include data-color-system("btn-color", "button");
+ *   }
+ */
+@mixin data-color-system($color-prop, $style-type: "component", $options: ()) {
+  // Set default CSS custom property
+  --#{$color-prop}: #{$color-primary};
+
+  // Generate data-color attribute variants
+  @include semantic-color-variants($color-prop);
+
+  // Apply styling to all data-color elements
+  &[data-color] {
+    @if $style-type == "button" {
+      @include semantic-button-interactive($color-prop, $options);
+    } @else {
+      @include semantic-component-base($color-prop, $options);
+    }
+  }
+}
+
+/**
+ * Complete data-color implementation for text-based elements (links, code)
+ * Generates variants with hover colors and applies color properties
+ * 
+ * @param {string} $base-prop - Base color CSS custom property name
+ * @param {string} $hover-prop - Hover color CSS custom property name
+ * 
+ * @example
+ *   .link {
+ *     @include data-color-text-system("link-color", "link-color-hover");
+ *     color: var(--link-color);
+ *     &:hover { color: var(--link-color-hover); }
+ *   }
+ */
+@mixin data-color-text-system($base-prop, $hover-prop) {
+  // Set defaults
+  --#{$base-prop}: #{$if-primary};
+  --#{$hover-prop}: #{$if-primary-hover};
+
+  // Generate variants with hover colors
+  @include semantic-color-variants-with-hover($base-prop, $hover-prop);
+}
+
+// ============================================================
+// UTILITY: COLOR-MIX HELPERS
+// ============================================================
+
+/**
+ * Generate color-mix() value for consistent opacity handling
+ * 
+ * @param {string} $color - Color value or CSS custom property
+ * @param {number} $opacity - Opacity percentage (0-100)
+ * @param {string} $method - Color space (default: "in srgb")
+ * 
+ * @example
+ *   background: color-mix-opacity(var(--btn-color), 12);
+ *   // Outputs: color-mix(in srgb, var(--btn-color) 12%, transparent)
+ */
+@function color-mix-opacity($color, $opacity, $method: "in srgb") {
+  @return color-mix(#{$method}, #{$color} #{$opacity + "%"}, transparent);
+}
+
+/**
+ * Generate Git ANSI color mapping for branch colors
+ * Maps data-color attributes to --branch-color variable
+ * 
+ * @example
+ *   .branchRow {
+ *     @include git-branch-color-mapping;
+ *   }
+ */
+@mixin git-branch-color-mapping {
+  &[data-color="green"] {
+    --branch-color: var(--git-ansi-green);
+    --git-color: var(--git-ansi-green);
+  }
+  &[data-color="yellow"] {
+    --branch-color: var(--git-ansi-yellow);
+    --git-color: var(--git-ansi-yellow);
+  }
+  &[data-color="magenta"] {
+    --branch-color: var(--git-ansi-magenta);
+    --git-color: var(--git-ansi-magenta);
+  }
+  &[data-color="cyan"] {
+    --branch-color: var(--git-ansi-cyan);
+    --git-color: var(--git-ansi-cyan);
+  }
+  &[data-color="red"] {
+    --branch-color: var(--git-ansi-red);
+    --git-color: var(--git-ansi-red);
+  }
+  &[data-color="blue"] {
+    --branch-color: var(--git-ansi-blue);
+    --git-color: var(--git-ansi-blue);
+  }
+}

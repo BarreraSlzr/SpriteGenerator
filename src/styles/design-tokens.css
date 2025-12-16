@@ -1,0 +1,637 @@
+/* InternetFriends Design Tokens */
+
+:root {
+  /* Brand Colors */
+  --if-primary: #3b82f6;
+  --if-primary-hover: #2563eb;
+  --if-primary-light: rgba(59, 130, 246, 0.1);
+  --if-primary-active: #1d4ed8;
+  --if-accent: #8b5cf6;
+  --accent-glow: 0 8px 16px rgba(var(--if-accent), 0.25);
+  /* Primary hue glows */
+  --shadow-primary-glow-sm: 0 0 20px rgba(var(--if-primary), 0.25);
+  --shadow-primary-glow-md: 0 0 30px rgba(var(--if-primary), 0.35);
+  --shadow-primary-glow-lg: 0 0 40px rgba(var(--if-primary), 0.45);
+  /* Derived color-mix versions for the future or experiment */
+  --shadow-primary-mix-sm: 0 0 20px
+    color-mix(in srgb, var(--if-primary) 30%, var(--color-bg) 70%);
+  --shadow-primary-mix-md: 0 0 30px
+    color-mix(in srgb, var(--if-primary) 45%, var(--color-bg) 55%);
+  /* Accent glow tokens */
+  --shadow-accent-glow-sm: 0 0 6px rgba(var(--if-accent), 1);
+  --shadow-accent-glow-md: 0 0 12px rgba(var(--if-accent), 0.6);
+  --shadow-accent-glow-lg: 0 0 20px rgba(var(--if-accent), 0.4);
+  /* Focus ring token used for focus and temporary focus-like glows */
+  --focus-ring: 0 0 0 3px rgba(var(--if-primary), 0.12);
+  --if-surface: #f8fafc;
+
+  /* True Glass Morphism System - Light Mode */
+  --glass-bg-header: rgba(
+    200,
+    220,
+    255,
+    0.8
+  ); /* Pastel blue-white with subtle tech feel */
+  --glass-border: rgba(59, 130, 246, 0.3);
+  --color-bg-glass: rgba(200, 220, 255, 0.1);
+
+  /* Glass Edge Effects - CSS Best Practices (web.dev recommendations) */
+  --glass-edge-blur: saturate(180%) blur(10px);
+  --glass-backdrop-blur: blur(12px);
+
+  /* Glass Gradient Masks - Fade-out edge effects */
+  --glass-mask-gradient: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  --glass-mask-radial: radial-gradient(
+    circle at center,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 255, 255, 0.7) 40%,
+    rgba(255, 255, 255, 0.3) 70%,
+    rgba(255, 255, 255, 0.1) 85%,
+    transparent 100%
+  );
+  --glass-mask-edge-fade: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 255, 255, 0.6) 20%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0.2) 80%,
+    transparent 100%
+  );
+  --glass-mask-corners: radial-gradient(
+    ellipse at top left,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 30%,
+    rgba(255, 255, 255, 0.3) 60%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+
+  /* Font Families */
+  --font-mono:
+    "Geist Mono", "IBM Plex Mono", SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+
+  /* Border Radius System */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+
+  /* Shadow System */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-glass-sm: 0 2px 12px rgba(59, 130, 246, 0.08);
+  --shadow-glass-md: 0 4px 16px rgba(59, 130, 246, 0.14);
+  --shadow-glass-lg: 0 8px 32px rgba(59, 130, 246, 0.2);
+  --shadow-glass:
+    0 8px 32px rgba(59, 130, 246, 0.1), 0 0 0 1px rgba(200, 220, 255, 0.3),
+    inset 0 1px 0 rgba(200, 220, 255, 0.6);
+  /* Inset shadow helpers (for pressed/ghost effects) */
+  --shadow-inset-sm: inset 0 0.5px 1px rgba(0, 0, 0, 0.03);
+  --shadow-inset-md: inset 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-inset-lg: inset 0 1.5px 3px rgba(0, 0, 0, 0.1);
+  /* Inverse (light) variants for use on dark themes only */
+  --shadow-sm-inverse: 0 2px 4px rgba(255, 255, 255, 0.05);
+  --shadow-md-inverse: 0 4px 8px rgba(255, 255, 255, 0.06);
+  --shadow-inset-light-sm: inset 0 0 20px rgba(255, 255, 255, 0.1);
+  --shadow-inset-light-xs: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  --shadow-inset-dark-xs: inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  /* Primary & Accent Glows */
+  --shadow-elevation-flat: 0 0 0 transparent;
+  --shadow-elevation-none: 0 0 0 transparent;
+  --shadow-elevation-xs: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-elevation-sm: 0 2px 4px rgba(15, 23, 42, 0.08);
+  --shadow-elevation-md: 0 4px 8px rgba(15, 23, 42, 0.12);
+  --shadow-elevation-lg: 0 8px 16px rgba(15, 23, 42, 0.16);
+  --shadow-elevation-xl: 0 16px 32px rgba(15, 23, 42, 0.2);
+  --shadow-elevation-2xl: 0 24px 48px rgba(15, 23, 42, 0.24);
+  --shadow-elevation-hover-none: 0 0 0 transparent;
+  --shadow-elevation-hover-xs: 0 2px 4px rgba(15, 23, 42, 0.08);
+  --shadow-elevation-hover-sm: 0 4px 8px rgba(15, 23, 42, 0.12);
+  --shadow-elevation-hover-md: 0 8px 16px rgba(15, 23, 42, 0.16);
+  --shadow-elevation-hover-lg: 0 12px 24px rgba(15, 23, 42, 0.2);
+  --shadow-elevation-hover-xl: 0 20px 40px rgba(15, 23, 42, 0.24);
+  --shadow-elevation-hover-2xl: 0 32px 64px rgba(15, 23, 42, 0.28);
+  /* Inverse / White glow used for light-on-dark UI highlights */
+  --shadow-white-glow-sm: 0 0 12px rgba(255, 255, 255, 0.06);
+  --shadow-white-glow-md: 0 0 24px rgba(255, 255, 255, 0.08);
+
+  /* Focus & Attention States */
+  --color-border-focus: #3b82f6;
+  --color-border-attention: #1d4ed8; /* Deep blue for attention/active states */
+  --color-border-attention-pulse: #3b82f6; /* Mid-tone for pulsing animation */
+
+  /* Text System */
+  --color-text-primary: #111827;
+  --color-text-secondary: #4b5563;
+  --color-text-tertiary: #6b7280;
+  --color-text-link: #3b82f6;
+  --color-text-inverse: #ffffff;
+
+  /* Background System */
+  --color-bg-muted: #f3f4f6;
+  --color-bg-surface: #ffffff;
+
+  /* Border System */
+  --color-border-default: #e5e7eb;
+  --color-border-subtle: #f3f4f6;
+  --color-border-emphasis: #9ca3af;
+
+  /* Semantic Color Scales */
+  --color-primary-100: #dbeafe;
+  --color-primary-200: #bfdbfe;
+
+  --color-success-100: #dcfce7;
+  --color-success-300: #86efac;
+
+  --color-warning-100: #fef3c7;
+  --color-warning-300: #fcd34d;
+
+  --color-error-100: #fee2e2;
+  --color-error-300: #fca5a5;
+
+  --color-info-100: #dbeafe;
+  --color-info-300: #93c5fd;
+
+  /* ANSI Colors for Git Graph */
+  --git-ansi-red: #ef4444;
+  --git-ansi-green: #22c55e;
+  --git-ansi-yellow: #f59e0b;
+  --git-ansi-blue: #3b82f6;
+  --git-ansi-magenta: #8b5cf6;
+  --git-ansi-cyan: #06b6d4;
+  --git-ansi-none: var(--color-text-primary);
+
+  /* Semantic Background/Border States */
+  --success-bg: #f0fdf4;
+  --success: #22c55e;
+
+  --warning-bg: #fffbeb;
+  --warning: #f59e0b;
+
+  --error-bg: #fef2f2;
+  --error: #ef4444;
+
+  /* Extended Semantic: Info */
+  --info-bg: var(--color-info-100);
+  --info: #3b82f6;
+
+  /* Semantic Dark Variants (for hover/active accents) */
+  --success-dark: #059669;
+  --warning-dark: #d97706;
+  --error-dark: #dc2626;
+  --info-dark: #2563eb;
+
+  /* Primary State Colors */
+  --primary-bg-subtle: rgba(59, 130, 246, 0.1);
+  --primary-bg-medium: rgba(59, 130, 246, 0.2);
+
+  /* Spacing System - 4px base unit scale */
+  --space-0-5: 0.125rem; /* 2px */
+  --space-1: 0.25rem; /* 4px */
+  --space-1-5: 0.375rem; /* 6px */
+  --space-2: 0.5rem; /* 8px */
+  --space-3: 0.75rem; /* 12px */
+  --space-4: 1rem; /* 16px */
+  --space-5: 1.25rem; /* 20px */
+  --space-6: 1.5rem; /* 24px */
+  --space-8: 2rem; /* 32px */
+  --space-10: 2.5rem; /* 40px */
+  --space-12: 3rem; /* 48px */
+  --space-16: 4rem; /* 64px */
+  --space-20: 5rem; /* 80px */
+
+  /* Semantic Spacing - Component specific */
+  --space-section-padding-sm: var(--space-6); /* 24px - Small sections */
+  --space-section-padding-md: var(--space-12); /* 48px - Medium sections */
+  --space-section-padding-lg: var(--space-16); /* 64px - Large sections */
+  --space-section-padding-xl: var(--space-20); /* 80px - Extra large sections */
+
+  --space-component-gap-sm: var(--space-3); /* 12px - Tight components */
+  --space-component-gap-md: var(--space-4); /* 16px - Standard components */
+  --space-component-gap-lg: var(--space-6); /* 24px - Loose components */
+
+  --space-element-gap-xs: var(--space-1); /* 4px - Very tight elements */
+  --space-element-gap-sm: var(--space-2); /* 8px - Tight elements */
+  --space-element-gap-md: var(--space-3); /* 12px - Standard elements */
+  --space-element-gap-lg: var(--space-4); /* 16px - Loose elements */
+
+  /* Layout Spacing */
+  --space-container-padding-sm: var(--space-4); /* 16px - Small containers */
+  --space-container-padding-md: var(--space-6); /* 24px - Medium containers */
+  --space-container-padding-lg: var(--space-8); /* 32px - Large containers */
+
+  /* StatusBar Spacing */
+  --statusbar-height-mobile: var(--space-2); /* 8px - Mobile StatusBar height */
+  --statusbar-height-desktop: var(
+    --space-4
+  ); /* 16px - Desktop StatusBar height */
+  --statusbar-total-height-mobile: var(
+    --space-2
+  ); /* 8px - Mobile total height */
+  --statusbar-total-height-desktop: calc(
+    var(--space-4) + 1px
+  ); /* 17px - Desktop height + border */
+
+  /* Container Widths */
+  --container-width: 1200px; /* Max width for main content */
+  --container-width-sm: 640px; /* Small container breakpoint */
+  --container-width-md: 768px; /* Medium container breakpoint */
+  --container-width-lg: 1024px; /* Large container breakpoint */
+  --container-width-xl: 1280px; /* Extra large container breakpoint */
+  --layout-page-gutter: clamp(
+    var(--space-container-padding-sm),
+    4vw,
+    var(--space-container-padding-lg)
+  );
+  --layout-full-bleed-padding: clamp(
+    var(--space-container-padding-md),
+    6vw,
+    var(--space-section-padding-md)
+  );
+  --layout-max-content-width: min(var(--container-width, 1200px), 94vw);
+  --layout-wide-content-width: min(1400px, 98vw);
+  --layout-breakout-gap: clamp(var(--space-4), 5vw, var(--space-12));
+  --layout-edge-gap-xs: 1px;
+  --layout-edge-gap-sm: var(--space-4);
+  --layout-edge-gap-lg: var(--space-container-padding-lg);
+  --layout-header-stack: 4.75rem;
+  --layout-header-border: 3px;
+  --layout-header-offset: var(--space-2);
+
+  /* Animation System */
+  --animation-float: float 3s ease-in-out infinite;
+  --animation-float-subtle: float 4s ease-in-out infinite;
+  --animation-attention-pulse: attention-pulse 1.8s ease-in-out infinite;
+  --duration-standard: 0.2s;
+  --duration-slow: 0.4s;
+  --easing-standard: ease-in-out;
+  --easing-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  /* Common Transforms */
+  --transform-lift: translateY(-1px);
+  --transform-press: translateY(0) scale(0.98);
+  --transform-float-up: translateY(-2px);
+  --transform-float-down: translateY(0px);
+
+  /* Glass Morphism Backgrounds - Light Mode (Pastel Blue-White Based) */
+  --glass-bg-subtle: rgba(200, 220, 255, 0.3);
+  --glass-bg-medium: rgba(200, 220, 255, 0.5);
+  --glass-bg-strong: rgba(200, 220, 255, 0.7);
+  --glass-bg-card: rgba(200, 220, 255, 0.4);
+  --glass-bg-button: rgba(200, 220, 255, 0.35);
+  --glass-bg-input: rgba(200, 220, 255, 0.25);
+
+  /* Glass Morphism Borders - Light Mode (Simplified) */
+  --glass-border-subtle: rgba(59, 130, 246, 0.2);
+  --glass-border-medium: rgba(59, 130, 246, 0.3);
+  --glass-border-strong: rgba(59, 130, 246, 0.5);
+  --glass-border-enhanced: rgba(59, 130, 246, 0.6);
+
+  /* Primary Color Backgrounds */
+  --primary-bg-subtle: rgba(59, 130, 246, 0.1);
+  --primary-bg-medium: rgba(59, 130, 246, 0.2);
+  --primary-bg-strong: rgba(59, 130, 246, 0.3);
+
+  /* State Backgrounds - Transparent versions */
+  --success-bg: rgba(34, 197, 94, 0.2);
+  --warning-bg: rgba(251, 191, 36, 0.2);
+  --error-bg: rgba(220, 53, 69, 0.1);
+  --purple-bg: rgba(168, 85, 247, 0.2);
+
+  /* State Colors - Solid versions for high visibility elements */
+  --success: rgb(34, 197, 94);
+  --warning: rgb(251, 191, 36);
+  --error: rgb(220, 53, 69);
+  --purple: rgb(168, 85, 247);
+
+  /* Priority Colors - Semantic mapping for badges and indicators */
+  --priority-high: rgb(239, 68, 68); /* Red */
+  --priority-medium: rgb(245, 158, 11); /* Amber */
+  --priority-low: rgb(34, 197, 94); /* Green - matches success */
+
+  /* Priority Color Backgrounds - With alpha variations */
+  --priority-high-bg-subtle: rgba(239, 68, 68, 0.1);
+  --priority-high-bg-medium: rgba(239, 68, 68, 0.2);
+  --priority-high-bg-strong: rgba(239, 68, 68, 0.3);
+  --priority-high-bg-badge: rgba(239, 68, 68, 0.8);
+  --priority-high-bg-selected: rgba(239, 68, 68, 0.9);
+
+  --priority-medium-bg-subtle: rgba(245, 158, 11, 0.1);
+  --priority-medium-bg-medium: rgba(245, 158, 11, 0.2);
+  --priority-medium-bg-strong: rgba(245, 158, 11, 0.3);
+  --priority-medium-bg-badge: rgba(245, 158, 11, 0.8);
+  --priority-medium-bg-selected: rgba(245, 158, 11, 0.9);
+
+  --priority-low-bg-subtle: rgba(34, 197, 94, 0.1);
+  --priority-low-bg-medium: rgba(34, 197, 94, 0.2);
+  --priority-low-bg-strong: rgba(34, 197, 94, 0.3);
+  --priority-low-bg-badge: rgba(34, 197, 94, 0.8);
+  --priority-low-bg-selected: rgba(34, 197, 94, 0.9);
+
+  /* Priority Shadow Variants */
+  --priority-high-shadow-subtle: rgba(239, 68, 68, 0.2);
+  --priority-high-shadow-medium: rgba(239, 68, 68, 0.3);
+  --priority-high-shadow-strong: rgba(239, 68, 68, 0.4);
+  --priority-high-shadow-glow: rgba(239, 68, 68, 0.6);
+
+  --priority-medium-shadow-subtle: rgba(245, 158, 11, 0.2);
+  --priority-medium-shadow-medium: rgba(245, 158, 11, 0.3);
+  --priority-medium-shadow-strong: rgba(245, 158, 11, 0.4);
+  --priority-medium-shadow-glow: rgba(245, 158, 11, 0.6);
+
+  --priority-low-shadow-subtle: rgba(34, 197, 94, 0.2);
+  --priority-low-shadow-medium: rgba(34, 197, 94, 0.3);
+  --priority-low-shadow-strong: rgba(34, 197, 94, 0.4);
+  --priority-low-shadow-glow: rgba(34, 197, 94, 0.6);
+
+  /* Common Backdrop Filters - CSS Best Practices (web.dev recommendations) */
+  --backdrop-blur-subtle: blur(4px);
+  --backdrop-blur-medium: saturate(180%) blur(8px);
+  --backdrop-blur-strong: saturate(180%) blur(16px);
+
+  /* Hero Section Canvas Integration */
+  --hero-bg-canvas-overlay: rgba(255, 255, 255, 0.2);
+  --hero-bg-gradient-overlay: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0.5) 50%,
+    rgba(255, 255, 255, 0.2) 100%
+  );
+  --canvas-blend-light: rgba(255, 255, 255, 0.9);
+  --canvas-text-contrast-light: rgba(0, 0, 0, 0.9);
+
+  /* Hero Typography Scale */
+  --hero-title-sm: 1.5rem; /* 24px */
+  --hero-title-md: 2rem; /* 32px */
+  --hero-title-lg: 2.5rem; /* 40px */
+  --hero-title-xl: 3rem; /* 48px */
+  --hero-subtitle: 1.125rem; /* 18px */
+
+  /* Theme Transition System */
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --theme-transition-bg: background-color 0.3s --ease-in-out;
+  --theme-transition-color: color 0.3s --ease-in-out;
+  --theme-transition-canvas: opacity 0.6s --ease-in-out;
+
+  /* Viewer Layout Transitions */
+  --transition-layout-smooth: all 0.4s --ease-in-out;
+  --transition-size-smooth:
+    height 0.4s --ease-in-out, width 0.4s --ease-in-out,
+    padding 0.4s --ease-in-out, margin 0.4s --ease-in-out;
+  --transition-slide-fade:
+    transform 0.5s --ease-in-out, opacity 0.5s --ease-in-out;
+
+  /* Legacy support */
+  --color-primary: #3b82f6;
+  --color-secondary: #6366f1;
+  --color-text: #1f2937;
+  --color-bg: #ffffff;
+
+  /* Additional UI Colors */
+  --color-surface: #ffffff;
+  --color-background: #f8fafc;
+  --color-border: #e2e8f0;
+  --color-surface-dark: #1e293b;
+  --color-border-dark: #334155;
+
+  /* Alpha Color Variants */
+  --if-primary-alpha-10: rgba(59, 130, 246, 0.1);
+  --if-primary-alpha-20: rgba(59, 130, 246, 0.2);
+  --if-background: #ffffff;
+
+  /* Interactive UI Colors */
+  --color-background-hover: #f1f5f9;
+  --color-background-subtle: #fafbfc;
+  --color-border-hover: #cbd5e1;
+  --color-text-muted: #64748b;
+
+  /* Typography Weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Line-Height Scale */
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+  --line-height-loose: 2;
+
+  /* Border Widths */
+  --border-width-thin: 1px;
+
+  /* Typography Scale */
+  --font-size-xs: 0.75rem; /* 12px */
+  --font-size-sm: 0.875rem; /* 14px */
+  --font-size-base: 1rem; /* 16px */
+  --font-size-lg: 1.125rem; /* 18px */
+  --font-size-xl: 1.25rem; /* 20px */
+  --font-size-2xl: 1.5rem; /* 24px */
+  --font-size-3xl: 1.875rem; /* 30px */
+  --text-sm: 0.875rem; /* alias */
+
+  /* Glass Enhancements */
+  --color-bg-glass-enhanced: rgba(200, 220, 255, 0.6);
+  --color-bg-glass-subtle: rgba(200, 220, 255, 0.2);
+
+  /* Border Radius Additions */
+  --radius-full: 9999px;
+}
+
+/* Dark Mode Overrides */
+[data-theme="dark"] {
+  /* True Glass Morphism System - Custom Dark Blue */
+  --glass-bg-header: rgb(0 5 30 / 80%);
+  --glass-border: rgba(59, 130, 246, 0.3);
+  --color-bg-glass: rgba(8, 18, 53, 0.5);
+
+  /* Dark Header Hover Colors - Enhanced for dark backgrounds */
+  --if-primary-hover: rgb(120, 190, 255);
+  --if-primary-hover-dark-bg: #3b82f6;
+
+  --if-primary-active: #1e40af;
+
+  /* Glass Edge Effects - Dark Mode - CSS Best Practices (web.dev recommendations) */
+  --glass-edge-blur: saturate(180%) blur(10px);
+  --glass-backdrop-blur: blur(12px);
+  --glass-mask-gradient: transparent;
+
+  /* Dark Text System */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #d1d5db;
+  --color-text-tertiary: #9ca3af;
+  --color-text-link: #60a5fa;
+
+  /* Dark Background System */
+  --color-bg-muted: #374151;
+  --color-bg-surface: #1f2937;
+
+  /* Dark Border System */
+  --color-border-default: #4b5563;
+  --color-border-subtle: #374151;
+  --color-border-emphasis: #6b7280;
+
+  /* Dark Semantic Color Scales */
+  --color-primary-100: #1e3a8a;
+  --color-primary-200: #1e40af;
+
+  --color-success-100: #14532d;
+  --color-success-300: #22c55e;
+
+  --color-warning-100: #78350f;
+  --color-warning-300: #f59e0b;
+
+  --color-error-100: #7f1d1d;
+  --color-error-300: #ef4444;
+
+  --color-info-100: #1e3a8a;
+  --color-info-300: #60a5fa;
+
+  /* Dark Semantic Background/Border States */
+  --success-bg: rgba(34, 197, 94, 0.1);
+  --success: #22c55e;
+
+  --warning-bg: rgba(245, 158, 11, 0.1);
+  --warning: #f59e0b;
+
+  --error-bg: rgba(239, 68, 68, 0.1);
+  --error: #ef4444;
+
+  /* Extended Semantic: Info */
+  --info-bg: rgba(96, 165, 250, 0.1);
+  --info: #60a5fa;
+
+  /* Semantic Dark Variants */
+  --success-dark: #16a34a;
+  --warning-dark: #b45309;
+  --error-dark: #b91c1c;
+  --info-dark: #3b82f6;
+
+  /* Dark Primary State Colors */
+  --primary-bg-subtle: rgba(96, 165, 250, 0.1);
+  --primary-bg-medium: rgba(96, 165, 250, 0.2);
+
+  /* Enhanced Blue Tone Dark Backgrounds */
+  --color-bg: #081235;
+  --if-surface: #162d5a;
+
+  /* Glass Morphism Backgrounds - Dark Mode Overrides (Simplified) */
+  --glass-bg-subtle: rgba(8, 18, 53, 0.3);
+  --glass-bg-medium: rgba(8, 18, 53, 0.5);
+  --glass-bg-strong: rgba(8, 18, 53, 0.7);
+  --glass-bg-card: rgba(8, 18, 53, 0.4);
+  --glass-bg-button: rgba(8, 18, 53, 0.35);
+  --glass-bg-input: rgba(8, 18, 53, 0.25);
+
+  /* Glass Morphism Borders - Dark Mode Overrides (Simplified) */
+  --glass-border-subtle: rgba(59, 130, 246, 0.2);
+  --glass-border-medium: rgba(59, 130, 246, 0.3);
+  --glass-border-strong: rgba(59, 130, 246, 0.5);
+  --glass-border-enhanced: rgba(59, 130, 246, 0.7);
+
+  /* Enhanced Glass Shadows - Stronger Blue Tone */
+  --shadow-glass:
+    0 8px 32px rgba(8, 18, 53, 0.9), 0 0 0 1px rgba(59, 130, 246, 0.15),
+    inset 0 1px 0 rgba(59, 130, 246, 0.1);
+
+  /* Hero Section Canvas Integration - Dark Mode */
+  --hero-bg-canvas-overlay: rgba(8, 18, 53, 0.08);
+  --hero-bg-gradient-overlay: linear-gradient(
+    135deg,
+    rgba(8, 18, 53, 0.02) 0%,
+    rgba(8, 18, 53, 0.08) 50%,
+    rgba(8, 18, 53, 0.02) 100%
+  );
+  --canvas-blend-dark: rgba(8, 18, 53, 0.9);
+  --canvas-text-contrast-dark: rgba(255, 255, 255, 0.95);
+
+  /* Dark Mode UI Colors */
+  --color-surface: #1e293b;
+  --color-background: #0f172a;
+  --color-border: #334155;
+  --if-background: #0f172a;
+  --color-bg-glass-enhanced: rgba(8, 18, 53, 0.6);
+  --color-bg-glass-subtle: rgba(8, 18, 53, 0.2);
+
+  /* Interactive UI Colors - Dark Mode */
+  --color-background-hover: #1e293b;
+  --color-background-subtle: #0a111f;
+  --color-border-hover: #475569;
+  --color-text-muted: #94a3b8;
+}
+
+/* ===== KEYFRAME ANIMATIONS ===== */
+
+/* Slide fade in from left animation */
+@keyframes slideFadeInLeft {
+  0% {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Slide fade out to left animation */
+@keyframes slideFadeOutLeft {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+}
+
+/* Attention pulse animation for focus/hover states */
+@keyframes attention-pulse {
+  0%,
+  100% {
+    border-color: var(--color-border-attention);
+  }
+
+  50% {
+    border-color: var(--color-border-pulse);
+  }
+}
+
+/* General border pulse animation using primary color system */
+@keyframes border-pulse {
+  0%,
+  100% {
+    border-color: var(--glass-border-enhanced);
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+  50% {
+    border-color: var(--if-primary-active);
+    box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.2);
+  }
+}
+
+/* Border pulse with glow - Enhanced version */
+@keyframes border-pulse-glow {
+  0%,
+  100% {
+    border-color: var(--if-primary);
+    box-shadow:
+      var(--shadow-glass),
+      0 0 0 0 rgba(59, 130, 246, 0);
+  }
+  50% {
+    border-color: var(--if-primary-active);
+    box-shadow:
+      var(--shadow-glass-md),
+      0 0 0 4px rgba(29, 78, 216, 0.25),
+      0 0 20px rgba(29, 78, 216, 0.15);
+  }
+}
